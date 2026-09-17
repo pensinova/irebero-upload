@@ -14,9 +14,16 @@ app.use(cors({
 
 const upload = multer({ dest: "uploads/" });
 
+
+const B2_KEY_ID="005ee2294d9b2510000000002";
+const B2_APPLICATION_KEY="K005l9n3UbyCf20QFvNfsWPUIrOlJQs";
+const B2_BUCKET_ID= "3eee023279247d299be20511";
+
+
+
 const b2 = new B2({
-    applicationKeyId: process.env.B2_KEY_ID,
-    applicationKey: process.env.B2_APPLICATION_KEY,
+    applicationKeyId: B2_KEY_ID, // process.env.B2_KEY_ID,
+    applicationKey: B2_APPLICATION_KEY, // process.env.B2_APPLICATION_KEY,
 });
 
 // Store upload progress
@@ -107,7 +114,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         // GET B2 UPLOAD URL
         // ===============================
 
-        const bucketId = process.env.B2_BUCKET_ID;
+        const bucketId = B2_BUCKET_ID; // process.env.B2_BUCKET_ID;
 
         const uploadUrlResponse = await b2.getUploadUrl({
             bucketId
@@ -225,6 +232,59 @@ app.post("/upload", upload.single("file"), async (req, res) => {
         });
     }
 });
+
+
+// app.get("/getmovies", async (req, res) => {
+
+//     try {
+//         const movies = await fetch("https://irebero.pensinova.workers.dev/movies");
+
+//         return res.json(await movies.json());
+//     }
+//     catch (err) {
+//         console.error("Fetching Error:", err);
+//         res.status(500).json({ error: "Failed to fetch movies" });
+//     }
+// });
+
+
+// app.get("/getmore", async (req, res) => {
+
+//     return "B2_APPLICATION_KEY";
+
+//     try {
+//         const genres = await fetch("https://irebero.pensinova.workers.dev/genres");
+//         const translators = await fetch("https://irebero.pensinova.workers.dev/translators");
+//         const recentMovies = await fetch("https://irebero.pensinova.workers.dev/movies/recent");
+//         const trendingMovies = await fetch("https://irebero.pensinova.workers.dev/movies/trending");
+//         const series = await fetch("https://irebero.pensinova.workers.dev/series");
+
+//         const gen = await genres.json();
+//         const translator = await translators.json();
+//         const recentMovie = await recentMovies.json();
+//         const trendingMovie = await trendingMovies.json();
+//         const serie = await series.json();
+
+
+//         return res.json({
+//             genres: gen,
+//             translators: translator,
+//             recentMovies: recentMovie,
+//             trendingMovies: trendingMovie,
+//             series: serie
+//         });
+//     }
+//     catch (err) {
+//         console.error("Fetching Error:", err);
+//         res.status(500).json({ error: "Failed to fetch data" });
+//     }
+// });
+
+
+
+
+
+
 
 
 // ===============================
