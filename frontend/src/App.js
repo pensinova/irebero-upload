@@ -10,18 +10,20 @@ import Movies from './pages/movies';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/upload" element={<Upload />} />
-        <Route path="/signin" element={<Signin />} />
+    <div className="bg-light" style={{ minHeight: "100vh" }}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/upload" element={<Upload />} />
+          <Route path="/signin" element={<Signin />} />
 
-        <Route path="movies" element={<Movies />} />
+          <Route path="movies" element={<Movies />} />
 
-        <Route path='/*' element={<Lost />} />
+          <Route path='/*' element={<Lost />} />
 
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </div>
   );
 }
 
