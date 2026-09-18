@@ -1,9 +1,10 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import Upload from './pages/upload';
 import Home from './pages/home';
 import Signin from './pages/signin';
 import Lost from './pages/lost';
+import Movies from './pages/movies';
 
 
 
@@ -15,6 +16,7 @@ function App() {
         <Route path="/upload" element={<Upload />} />
         <Route path="/signin" element={<Signin />} />
 
+        <Route path="movies" element={<Movies />} />
 
         <Route path='/*' element={<Lost />} />
 

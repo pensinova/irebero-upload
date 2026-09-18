@@ -221,6 +221,7 @@ export default function Upload() {
 
      // NEW SERIES
      const HandleSubmitSerie = async (e) => {
+          setFillAll(false);
 
           if (newSerieTitle === "" ||
                newSerieTranslator === "" ||
@@ -552,8 +553,63 @@ export default function Upload() {
      }
 
      const uploadDB = async (e) => {
-          // e.preventDefault;
-     }
+          e.preventDefault();
+
+          if (!movieName) {
+               alert("Please upload or select a movie first.");
+               return;
+          }
+
+          if (!thumbnailUrl) {
+               alert("Please upload a thumbnail first.");
+               return;
+          }
+
+          const form = e.currentTarget;
+
+          const data = {
+               title: title.trim(),
+               description: form.description.value.trim(),
+               genre: form.genre.value,
+               language: form.language.value.trim(),
+               year: form.year.value,
+               video_path: movieName,
+               thumbnail: form.thumbnail.value,
+               translator_id: form.translator_id.value,
+               serie: form.seriesSelecion.value,
+               country: form.country.value.trim(),
+          };
+
+          try {
+               const response = await fetch(
+                    "https://irebero.pensinova.workers.dev/movies",
+                    {
+                         method: "POST",
+                         headers: {
+                              "Content-Type": "application/json",
+                         },
+                         body: JSON.stringify(data),
+                    }
+               );
+
+               const result = await response.json();
+
+               if (!response.ok || !result.success) {
+                    throw new Error(result.message || "Failed to save movie");
+               }
+
+               alert("Movie published successfully!");
+
+               // Refresh movie data
+               getMovies();
+               getRecent();
+               getTrending();
+
+          } catch (error) {
+               console.error("DB SAVE ERROR:", error);
+               alert(error.message);
+          }
+     };
 
 
 
@@ -563,7 +619,7 @@ export default function Upload() {
 
 
      return (
-          <div className="bg-dark text-light" style={{ minHeight: "100vh" }}>
+          <div className="container">
 
 
 
@@ -924,10 +980,9 @@ export default function Upload() {
 
                                    {
                                         fillAll && (
-                                             <div className="alert alert-danger alert-dismissible fade show mt-5" role="alert">
+                                             <div className="alert alert-danger alert-dismissible fade show mt-3" role="alert">
                                                   Fill Fields please
-                                                  <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                             </div>
+                                                  <button type="button" className="btn-close" data-bs-dismiss="alerrt" aria-label="Cloose" onClick={() => setFillAll(false)} />                                            </div>
                                         )
                                    }
 
@@ -939,7 +994,7 @@ export default function Upload() {
                                                   <input id="thumbnail" type="file" className="form-control" accept="image/*" name="thumb"
                                                        onChange={(e) => { setNewSerieTitle(e.target.files[0].name.split(".")[0]); setSerieThumbnail(e.target.files[0].name); uploadThumbnail(e.target.files[0]) }} />
 
-                                                  <div className="row mt-2 g-2">
+                                                  <div className="row mt-1 g-2">
                                                        <div className="col-md-8" id="uploadingThumbnail">
 
 
@@ -990,7 +1045,7 @@ export default function Upload() {
                                              <input type="text" className="form-control" id="serieTitle" required placeholder="Serie Title"
                                                   value={newSerieTitle} onChange={e => setNewSerieTitle(e.target.value)} />
 
-                                             <label htmlFor="serieTrans" className="mt-2">Translator:</label>
+                                             <label htmlFor="serieTrans" className="mt-1">Translator:</label>
                                              <select
                                                   name="translator"
                                                   id="serieTrans"
@@ -1010,7 +1065,7 @@ export default function Upload() {
 
 
 
-                                             <label htmlFor="serieGenre" className="mt-2">Genre:</label>
+                                             <label htmlFor="serieGenre" className="mt-1">Genre:</label>
                                              <select
                                                   name="genre"
                                                   id="serieGenre"
@@ -1029,15 +1084,15 @@ export default function Upload() {
                                              </select>
 
 
-                                             <label htmlFor="serieCountry" className="mt-2">Country:</label>
+                                             <label htmlFor="serieCountry" className="mt-1">Country:</label>
                                              <input type="text" className="form-control" placeholder="Country" value={serieCountry} onChange={(e) => setSerieCountry(e.target.value)} />
 
 
-                                             <label htmlFor="serieYear" className="mt-2">Year:</label>
+                                             <label htmlFor="serieYear" className="mt-1">Year:</label>
                                              <input type="number" className="form-control" placeholder="Year" value={serieYear} onChange={(e) => setSerieYear(e.target.value)} />
 
 
-                                             <label htmlFor="serieYear" className="mt-2">Description:</label>
+                                             <label htmlFor="serieYear" className="mt-1">Description:</label>
                                              <textarea name="description" id="serieDescription" rows="3"
                                                   className="form-control" placeholder="Description" value={serieDescription} onChange={(e) => setSerieDescription(e.target.value)}></textarea>
 
