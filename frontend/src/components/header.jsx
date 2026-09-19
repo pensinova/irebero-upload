@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../authContext";
 
 
 
 export default function Header() {
+     const { user, status } = useAuth();
+
+
 
      return (
 
@@ -53,12 +57,15 @@ export default function Header() {
                               </ul>
 
                               <form className="d-flex">
-                                   <span className="input-group-text bg-transparent" id="">
-                                        <i>User</i>
+                                   <span className="p-2 m-auto bg-transparent" id="">
+                                        <i>{user?.email}</i>
                                    </span>
-                                   <button className="btn btn-primary rounded-pill btn-sm" type="button">
-                                        <Link to="/signin" className="btn ">Login</Link>
-                                   </button>
+                                   {!status?
+                                        <Link to="/signin" className="btn btn btn-primary rounded-pill btn-sm">Login</Link>
+                                  :
+                                   <button className="btn btn-danger rounded-pill btn-sm" type="button">
+                                        Logout
+                                   </button>}
                               </form>
                          </div>
 

@@ -275,7 +275,7 @@ export default function Home() {
 
                               <div className="col-md-6">
                                    <h4>Translators</h4>
-                                   <div className="table-responsive rounded shadow">
+                                   <div className="table-responsive rounded shadow" style={{ maxHeight: 500 }}>
                                         <table className="table">
                                              <thead>
                                                   <tr>
@@ -341,7 +341,7 @@ export default function Home() {
 
                               <div className="col-md-6">
                                    <h4>Genres</h4>
-                                   <div className="table-responsive rounded shadow">
+                                   <div className="table-responsive rounded shadow" style={{ maxHeight: 500 }}>
                                         <table className="table">
                                              <thead>
                                                   <tr>

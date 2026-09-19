@@ -1,23 +1,43 @@
-require("dotenv").config();
+
 
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
 const B2 = require("backblaze-b2");
 const fs = require("fs");
+const session = require("express-session");
+require("dotenv").config();
 
 const app = express();
 
 app.use(cors({
-    origin: "http://localhost:3000"
+    origin: "http://localhost:3000",
+    credentials: true,
 }));
+
+app.use(express.json());
+
+app.use(
+    session({
+        secret: "irebero-secretyttrtr43435", //process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 1000 * 60 * 60 * 24, // 1 day
+        },
+    })
+);
+
+
 
 const upload = multer({ dest: "uploads/" });
 
 
-const B2_KEY_ID="005ee2294d9b2510000000002";
-const B2_APPLICATION_KEY="K005l9n3UbyCf20QFvNfsWPUIrOlJQs";
-const B2_BUCKET_ID= "3eee023279247d299be20511";
+const B2_KEY_ID = "005ee2294d9b2510000000002";
+const B2_APPLICATION_KEY = "K005l9n3UbyCf20QFvNfsWPUIrOlJQs";
+const B2_BUCKET_ID = "3eee023279247d299be20511";
 
 
 
@@ -234,55 +254,78 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 });
 
 
-// app.get("/getmovies", async (req, res) => {
-
-//     try {
-//         const movies = await fetch("https://irebero.pensinova.workers.dev/movies");
-
-//         return res.json(await movies.json());
-//     }
-//     catch (err) {
-//         console.error("Fetching Error:", err);
-//         res.status(500).json({ error: "Failed to fetch movies" });
-//     }
-// });
 
 
-// app.get("/getmore", async (req, res) => {
+// CHECK SESSION
+app.get("/check-session", async (req, res) => {
 
-//     return "B2_APPLICATION_KEY";
+    if (!req.session.user.status) {
+        // return res.json({ status: false });
+    }
 
-//     try {
-//         const genres = await fetch("https://irebero.pensinova.workers.dev/genres");
-//         const translators = await fetch("https://irebero.pensinova.workers.dev/translators");
-//         const recentMovies = await fetch("https://irebero.pensinova.workers.dev/movies/recent");
-//         const trendingMovies = await fetch("https://irebero.pensinova.workers.dev/movies/trending");
-//         const series = await fetch("https://irebero.pensinova.workers.dev/series");
+    return res.json({
+        status: true,
+        user: req.session.user
+    });
 
-//         const gen = await genres.json();
-//         const translator = await translators.json();
-//         const recentMovie = await recentMovies.json();
-//         const trendingMovie = await trendingMovies.json();
-//         const serie = await series.json();
+});
 
 
-//         return res.json({
-//             genres: gen,
-//             translators: translator,
-//             recentMovies: recentMovie,
-//             trendingMovies: trendingMovie,
-//             series: serie
-//         });
-//     }
-//     catch (err) {
-//         console.error("Fetching Error:", err);
-//         res.status(500).json({ error: "Failed to fetch data" });
-//     }
-// });
+// LOGIN
+
+app.get("/getLogin", async (req, res) => {
+
+    const email = req.query.email;
+    const password = req.query.password;
+
+    try {
+        const response = await fetch(
+            `https://irebero.pensinova.workers.dev/login?email=${email}&password=${password}`
+        );
+
+        const result = await response.json();
+
+        if (!result.success) {
+            return res.status(401).json({
+                status: result.success,
+                error: result.message
+            });
+        }
+
+        req.session.user = {
+            status: result.success,
+            id: result.user.id,
+            email: result.user.email,
+            name: result.user.name
+        };
+
+        return res.json({
+            status: req.session.user.status,
+            user: req.session.user
+        });
+
+    } catch (e) {
+        console.error(e);
+
+        return res.status(500).json({
+            status: false,
+            error: "Internal server error: " + e.message
+        });
+    }
+});
 
 
 
+app.get("/logout", (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({ error: "Logout failed" });
+        }
 
+        res.clearCookie("connect.sid");
+        res.json({ success: true });
+    });
+});
 
 
 

@@ -10,13 +10,14 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "ES Module",
   "description": "",
   "dependencies": {
     "backblaze-b2": "^1.7.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-session": "^1.19.0",
     "js-sha1": "^0.7.0",
     "multer": "^2.2.0"
   },
