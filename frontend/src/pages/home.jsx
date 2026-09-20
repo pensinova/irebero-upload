@@ -18,8 +18,7 @@ export default function Home() {
      const [loadingData, setLoadingData] = useState(false);
 
 
-     const [thumbnailUrl, setThumbnailUrl] = useState("");
-     const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+
      const [mostViewed, setMostViewed] = useState({});
      const [mostDownloaded, setMostDownloaded] = useState({});
      const [mostRecent, setMostRecent] = useState({});
@@ -41,21 +40,15 @@ export default function Home() {
 
 
      const [newGenreName, setNewGenreName] = useState("");
-     const [newSerieTitle, setNewSerieTitle] = useState("");
-     const [newSerieTranslator, setNewSerieTranslator] = useState("");
-     const [newSerieGenre, setNewSerieGenre] = useState("");
      const [sendingNewGenre, setSendingNewGenre] = useState(false);
      const [newGenreAlert, setNewGenreAlert] = useState("");
 
-     const [title, setTitle] = useState("");
-     const [serieDescription, setSerieDescription] = useState("");
-     const [serieYear, setSerieYear] = useState("");
-     const [serieCountry, setSerieCountry] = useState("");
-     const [serieThumbnail, setSerieThumbnail] = useState("");
+     const [newTranslatorName, setNewTranslatorName] = useState("");
+     const [sendingNewTranslator, setSendingNewTranslator] = useState(false);
+     const [newTranslatorAlert, setNewTranslatorAlert] = useState("");
 
 
 
-     const [uploadingThumbnailSuccess, setUploadingThumbnailSuccess] = useState({});
 
 
 
@@ -225,124 +218,79 @@ export default function Home() {
           }, 5000);
      }
 
-     // NEW SERIES
-     const HandleSubmitSerie = async (e) => {
-          setFillAll(false);
 
-          if (newSerieTitle === "" ||
-               newSerieTranslator === "" ||
-               newSerieGenre === "" ||
-               serieCountry === "" ||
-               serieYear === "" ||
-               serieDescription === "" ||
-               serieThumbnail === ""
+
+     // NEW TRANSLATOR
+     const submitTranslator = async (e) => {
+
+          e.preventDefault();
+
+          setSendingNewTranslator(true)
+          setNewTranslatorAlert("");
+          const res = await fetch(`https://irebero.pensinova.workers.dev/newtranslator?name=${newTranslatorName}`);
+
+
+          const result = await res.json();
+
+
+
+          if (result.success === true) {
+               setNewTranslatorName("");
+               setNewTranslatorAlert("Translator added successfully!");
+
+               getData();
+
+          }
+          else {
+               setNewTranslatorAlert(result.message);
+          }
+
+          setSendingNewTranslator(false);
+          setTimeout(() => {
+
+               setNewTranslatorAlert("");
+
+          }, 5000);
+     }
+
+
+     const deleteTranslator = async (id, name) => {
+
+          if (
+               window.confirm(
+                    `Delete "${name}"?`
+               )
           ) {
 
-               setFillAll(true);
-          }
-
-          else {
-               setFillAll(false);
-
-               setNewSerieAlert("");
-               setNewSerieSending(true)
-
-               const res = await fetch(`https://irebero.pensinova.workers.dev/newserie?title=${newSerieTitle}&translator=${newSerieTranslator}&genre=${newSerieGenre}&description=${serieDescription}&year=${serieYear}&country=${serieCountry}&thumbnail=${serieThumbnail}`);
-
-
-               const result = await res.json();
-
-
-
-               if (result.success === true) {
-                    setNewSerieTitle("");
-                    setNewSerieAlert("Series added successfully!");
-                    setSerieCountry("");
-                    setSerieYear("");
-                    setSerieThumbnail("");
-                    setNewSerieTranslator("");
-                    setNewSerieGenre("");
-
-                    setTimeout(() => {
-
-                         setNewSerieAlert("");
-
-                    }, 5000);
-
-
-               }
-               else {
-                    setNewSerieAlert(result.message);
-               }
-
-               setNewSerieSending(false);
-
-
-               setTimeout(() => {
-
-                    setNewSerieAlert("");
-
-               }, 5000);
-
-
-          }
-     }
-
-
-
-
-     // UPLOAD THUMBNAIL TO R2
-
-     async function uploadThumbnail(file) {
-
-
-          if (!file) return;
-
-          const imageUrl = URL.createObjectURL(file);
-          setThumbnailUrl(imageUrl);
-
-
-          const formData = new FormData();
-
-          formData.append("thumbnail", file);
-
-          setUploadingThumbnail(true);
-
-          try {
-
-               const res = await fetch("https://irebero.pensinova.workers.dev/upload/thumbnail", {
-                    method: "POST",
-                    body: formData
-               });
-
-
-               const text = await res.text();
-
-
-               let data;
+               setLoading(true);
 
                try {
-                    data = JSON.parse(text);
+                    const res = await fetch(`https://irebero.pensinova.workers.dev/deletetranslator?id=${id}&name=${name}`);
 
-                    setUploadingThumbnailSuccess(data);
 
+                    const result = await res.json();
+
+
+
+                    if (result.success === true) {
+
+                         getData();
+
+                    }
+                    else {
+                         alert(result.message);
+                    }
                }
-               catch {
-
-                    throw new Error("Server returned invalid JSON");
+               catch (e) {
+                    alert("Error while deleting Translator")
                }
 
-               setUploadingThumbnail(false);
-
+               setLoading(false);
 
           }
-          catch (err) {
-               setUploadingThumbnailSuccess({ success: false, message: 'Network Error! Try again.' });
-               console.log(err);
-          }
+
+
      }
-
-
 
 
 
@@ -506,7 +454,7 @@ export default function Home() {
                                                   {
                                                        translators.map((items, i) => (
                                                             <tr key={i}>
-                                                                 <td>{items.id}</td>
+                                                                 <td>{i + 1}</td>
 
 
 
@@ -543,7 +491,7 @@ export default function Home() {
                                                                                      (
                                                                                           <button
                                                                                                className="btn btn-sm btn-primary"
-
+                                                                                               disabled={loading}
                                                                                           >
                                                                                                <div className="spinner-border spinner-border-sm" role="status">
                                                                                                     <span className="visually-hidden">Loading...</span>
@@ -560,25 +508,26 @@ export default function Home() {
                                                                                 </button>}
 
 
+                                                                           {
+                                                                                !loading ?
 
-                                                                           <button
-                                                                                className="btn btn-sm btn-outline-danger"
-                                                                                title="Delete"
-                                                                                onClick={() => {
-                                                                                     if (
-                                                                                          window.confirm(
-                                                                                               `Delete "${items.name}"?`
-                                                                                          )
-                                                                                     ) {
-                                                                                          console.log(
-                                                                                               "Delete genre:",
-                                                                                               items.id
-                                                                                          );
-                                                                                     }
-                                                                                }}
-                                                                           >
-                                                                                <i className="bi bi-trash"></i>
-                                                                           </button>
+                                                                                     <button
+                                                                                          className="btn btn-sm btn-outline-danger"
+                                                                                          title="Delete"
+                                                                                          onClick={() => deleteTranslator(items.id, items.name)}
+                                                                                     >
+                                                                                          <i className="bi bi-trash"></i>
+                                                                                     </button> :
+                                                                                     <button
+                                                                                          className="btn btn-sm btn-outline-danger"
+                                                                                          title="Delete"
+                                                                                          disabled={loading}
+                                                                                     >
+                                                                                          <div className="spinner-border spinner-border-sm" role="status">
+                                                                                               <span className="visually-hidden">Loading...</span>
+                                                                                          </div>
+                                                                                     </button>
+                                                                           }
 
                                                                       </div>
 
@@ -616,7 +565,7 @@ export default function Home() {
                                                   {
                                                        genres.map((gen, i) => (
                                                             <tr key={i}>
-                                                                 <td>{gen.id}</td>
+                                                                 <td>{i+1}</td>
                                                                  <td>{gen.name}</td>
                                                                  <td className="text-end">
 
@@ -808,19 +757,19 @@ export default function Home() {
                     <div className="modal-dialog modal-dialog-centered">
                          <div className="modal-content bg-secondary text-light p-3">
                               <div className="d-flex justify-content-between">
-                                   <h1 className="modal-title fs-5" id="newGenreLabel">New Translator</h1>
+                                   <h1 className="modal-title fs-5" id="newTranslatorLabel">New Translator</h1>
                                    <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                               </div>
                               {
-                                   newGenreAlert && (
+                                   newTranslatorAlert && (
                                         <div className="alert alert-success alert-dismissible fade show mt-2" role="alert">
-                                             {newGenreAlert}
+                                             {newTranslatorAlert}
                                              <button type="button" className="btn-close" data-bs-dismiss="alert"></button>
                                         </div>
                                    )
                               }
 
-                              <form action="" className="form" onSubmit={submitGenre}>
+                              <form action="" className="form" onSubmit={submitTranslator}>
                                    <div className="modal-body my-3">
 
 
@@ -828,15 +777,15 @@ export default function Home() {
                                         <input type="text"
                                              className="form-control mt-2"
                                              placeholder="Translator's Name"
-                                             value={newGenreName}
-                                             onChange={(e) => setNewGenreName(e.target.value)}
+                                             value={newTranslatorName}
+                                             onChange={(e) => setNewTranslatorName(e.target.value)}
                                              required />
 
 
                                    </div>
                                    <div className="d-flex justify-content-center">
                                         <button type="button" className="btn btn-sm btn-danger m-1" data-bs-dismiss="modal">Close</button>
-                                        {sendingNewGenre ?
+                                        {sendingNewTranslator ?
                                              <button type="submit" className="btn btn-sm btn-info m-1" disabled>Sending...</button> :
                                              <button type="submit" className="btn btn-sm btn-primary m-1">Submit</button>
                                         }
