@@ -18,6 +18,8 @@ export default function Home() {
      const [loadingData, setLoadingData] = useState(false);
 
 
+     const [thumbnailUrl, setThumbnailUrl] = useState("");
+     const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
      const [mostViewed, setMostViewed] = useState({});
      const [mostDownloaded, setMostDownloaded] = useState({});
      const [mostRecent, setMostRecent] = useState({});
@@ -50,6 +52,11 @@ export default function Home() {
      const [serieYear, setSerieYear] = useState("");
      const [serieCountry, setSerieCountry] = useState("");
      const [serieThumbnail, setSerieThumbnail] = useState("");
+
+
+
+     const [uploadingThumbnailSuccess, setUploadingThumbnailSuccess] = useState({});
+
 
 
 
@@ -284,6 +291,61 @@ export default function Home() {
 
 
 
+     // UPLOAD THUMBNAIL TO R2
+
+     async function uploadThumbnail(file) {
+
+
+          if (!file) return;
+
+          const imageUrl = URL.createObjectURL(file);
+          setThumbnailUrl(imageUrl);
+
+
+          const formData = new FormData();
+
+          formData.append("thumbnail", file);
+
+          setUploadingThumbnail(true);
+
+          try {
+
+               const res = await fetch("https://irebero.pensinova.workers.dev/upload/thumbnail", {
+                    method: "POST",
+                    body: formData
+               });
+
+
+               const text = await res.text();
+
+
+               let data;
+
+               try {
+                    data = JSON.parse(text);
+
+                    setUploadingThumbnailSuccess(data);
+
+               }
+               catch {
+
+                    throw new Error("Server returned invalid JSON");
+               }
+
+               setUploadingThumbnail(false);
+
+
+          }
+          catch (err) {
+               setUploadingThumbnailSuccess({ success: false, message: 'Network Error! Try again.' });
+               console.log(err);
+          }
+     }
+
+
+
+
+
      return (
           <div className="container">
 
@@ -432,7 +494,7 @@ export default function Home() {
                                                        <th>#</th>
                                                        <th>Name</th>
                                                        <th className="text-end">
-                                                            <button className="btn btn-outline-primary rounded-5">
+                                                            <button className="btn btn-outline-primary rounded-5" type="button" data-bs-toggle="modal" data-bs-target="#newTranslator">
                                                                  <i class="bi bi-plus-circle"></i>
                                                             </button>
                                                        </th>
@@ -542,7 +604,7 @@ export default function Home() {
                                                        <th>#</th>
                                                        <th>Name</th>
                                                        <th className="text-end">
-                                                            <button className="btn btn-outline-success rounded-5">
+                                                            <button className="btn btn-outline-success rounded-5" type="button" data-bs-toggle="modal" data-bs-target="#newGenre">
                                                                  <i class="bi bi-plus-circle"></i>
                                                             </button>
                                                        </th>
@@ -741,165 +803,52 @@ export default function Home() {
 
 
 
-               {/* -----NEW SERIE ----- */}
-               <div className="modal fade bg-dark" id="newSerie" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="newSerieLabel" aria-hidden="true">
+               {/* ------ NEW TRANSLATOR ----- */}
+               <div className="modal fade bg-dark" id="newTranslator" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="newGenreLabel" aria-hidden="true">
                     <div className="modal-dialog modal-dialog-centered">
-                         <div className="modal-content bg-primary-subtle">
-
-                              <div className="p-3">
-
-                                   <div className="d-flex justify-content-between">
-                                        <h1 className="modal-title fs-5" id="newSerieLabel">Add New Serie</h1>
-                                        <button type="button" className="btn-close text-danger" data-bs-dismiss="modal"></button>
-                                   </div>
-
-                                   {
-                                        newSerieAlert && (
-                                             <div className="alert alert-success alert-dismissible fade show mt-2" role="alert">
-                                                  {newSerieAlert}
-                                                  <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                             </div>
-                                        )
-                                   }
-
-
-                                   {
-                                        fillAll && (
-                                             <div className="alert alert-danger alert-dismissible fade show mt-3" role="alert">
-                                                  Fill Fields please
-                                                  <button type="button" className="btn-close" data-bs-dismiss="alerrt" aria-label="Cloose" onClick={() => setFillAll(false)} />                                            </div>
-                                        )
-                                   }
-
-                                   <form action="" className="form">
-                                        <div className="modal-body">
-
-                                             <div className="mb-0">
-                                                  <label className="form-label mt-1">Thumbnail<span className="text-danger">*</span></label>
-                                                  <input id="thumbnail" type="file" className="form-control" accept="image/*" name="thumb"
-                                                       onChange={(e) => { setNewSerieTitle(e.target.files[0].name.split(".")[0]); setSerieThumbnail(e.target.files[0].name); uploadThumbnail(e.target.files[0]) }} />
-
-                                                  <div className="row mt-1 g-2">
-                                                       <div className="col-md-8" id="uploadingThumbnail">
-
-
-
-                                                            {uploadingThumbnail === true && (
-                                                                 <div className="alert alert-info">
-                                                                      <div className="spinner-border spinner-border-sm me-1" role="status">
-                                                                           <span className="visually-hidden small">Loading...</span>
-                                                                      </div>
-                                                                      Uploading Thumbnail...
-                                                                 </div>
-
-                                                            )}
-
-
-                                                            {/* success */}
-                                                            {uploadingThumbnailSuccess.success === true &&
-                                                                 <div className="alert alert-success alert-dismissible fade show" role="alert">
-                                                                      <i className="bi bi-check-circle"></i> Image Uploaded Successfully.
-                                                                      <button type="button" className="btn-close" data-bs-dismiss="alert"></button>
-                                                                 </div>}
-
-                                                            {uploadingThumbnailSuccess.success === false &&
-                                                                 <div className="alert alert-danger alert-dismissible fade show" role="alert">
-                                                                      <i className="bi bi-x-circle text-danger"></i> {uploadingThumbnailSuccess.message}
-                                                                      <button type="button" className="btn-close" data-bs-dismiss="alert"></button>
-                                                                 </div>
-                                                            }
-
-
-                                                       </div>
-                                                       <div className="col-md-4 preview-box" id="previewThumbnail">
-
-                                                            {thumbnailUrl &&
-                                                                 (<img src={thumbnailUrl} className="img-fluid rounded shadow" style={{
-                                                                      maxHeight: 100,
-                                                                      width: "100%",
-                                                                      // height: "300px",
-                                                                      background: "black",
-                                                                      objectFit: "cover"
-                                                                 }} alt="Thumbnail" />
-                                                                 )}
-                                                       </div>
-                                                  </div>
-                                             </div>
-
-                                             <label htmlFor="serieTitle">Title:</label>
-                                             <input type="text" className="form-control" id="serieTitle" required placeholder="Serie Title"
-                                                  value={newSerieTitle} onChange={e => setNewSerieTitle(e.target.value)} />
-
-                                             <label htmlFor="serieTrans" className="mt-1">Translator:</label>
-                                             <select
-                                                  name="translator"
-                                                  id="serieTrans"
-                                                  className="form-select"
-                                                  required
-                                                  value={newSerieTranslator}
-                                                  onChange={(e) => setNewSerieTranslator(e.target.value)}
-                                             >
-                                                  <option value="" disabled>Select</option>
-                                                  {
-                                                       translators?.map((item) => (
-                                                            <option value={item.id} key={item.id}>{item.name}</option>
-                                                       ))
-                                                  }
-                                             </select>
-
-
-
-
-                                             <label htmlFor="serieGenre" className="mt-1">Genre:</label>
-                                             <select
-                                                  name="genre"
-                                                  id="serieGenre"
-                                                  className="form-select"
-                                                  required
-                                                  value={newSerieGenre}
-                                                  onChange={(e) => setNewSerieGenre(e.target.value)}
-                                             >
-
-                                                  <option value="" disabled>Select</option>
-                                                  {
-                                                       genres?.map((item) => (
-                                                            <option value={item.id} key={item.id}>{item.name}</option>
-                                                       ))
-                                                  }
-                                             </select>
-
-
-                                             <label htmlFor="serieCountry" className="mt-1">Country:</label>
-                                             <input type="text" className="form-control" placeholder="Country" value={serieCountry} onChange={(e) => setSerieCountry(e.target.value)} />
-
-
-                                             <label htmlFor="serieYear" className="mt-1">Year:</label>
-                                             <input type="number" className="form-control" placeholder="Year" value={serieYear} onChange={(e) => setSerieYear(e.target.value)} />
-
-
-                                             <label htmlFor="serieYear" className="mt-1">Description:</label>
-                                             <textarea name="description" id="serieDescription" rows="3"
-                                                  className="form-control" placeholder="Description" value={serieDescription} onChange={(e) => setSerieDescription(e.target.value)}></textarea>
-
-                                        </div>
-
-
-
-                                        <div className="d-flex justify-content-center">
-                                             <button type="button" className="btn btn-warning btn-sm m-1" data-bs-dismiss="modal">Close</button>
-
-                                             {
-                                                  newSerieSending ?
-                                                       <button type="button" className="btn btn-info btn-sm m-1" disabled>Sending...</button> :
-                                                       <button type="button" onClick={HandleSubmitSerie} className="btn btn-primary btn-sm m-1">Submit</button>
-                                             }
-                                        </div>
-                                   </form>
+                         <div className="modal-content bg-secondary text-light p-3">
+                              <div className="d-flex justify-content-between">
+                                   <h1 className="modal-title fs-5" id="newGenreLabel">New Translator</h1>
+                                   <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                               </div>
+                              {
+                                   newGenreAlert && (
+                                        <div className="alert alert-success alert-dismissible fade show mt-2" role="alert">
+                                             {newGenreAlert}
+                                             <button type="button" className="btn-close" data-bs-dismiss="alert"></button>
+                                        </div>
+                                   )
+                              }
 
+                              <form action="" className="form" onSubmit={submitGenre}>
+                                   <div className="modal-body my-3">
+
+
+                                        <label htmlFor="name">Translator:</label>
+                                        <input type="text"
+                                             className="form-control mt-2"
+                                             placeholder="Translator's Name"
+                                             value={newGenreName}
+                                             onChange={(e) => setNewGenreName(e.target.value)}
+                                             required />
+
+
+                                   </div>
+                                   <div className="d-flex justify-content-center">
+                                        <button type="button" className="btn btn-sm btn-danger m-1" data-bs-dismiss="modal">Close</button>
+                                        {sendingNewGenre ?
+                                             <button type="submit" className="btn btn-sm btn-info m-1" disabled>Sending...</button> :
+                                             <button type="submit" className="btn btn-sm btn-primary m-1">Submit</button>
+                                        }
+                                   </div>
+                              </form>
                          </div>
                     </div>
                </div>
+
+
+
+
 
 
           </div>
