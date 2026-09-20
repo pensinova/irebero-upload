@@ -9,6 +9,26 @@ export default function Header() {
 
 
 
+     const logout = async () => {
+          try {
+               const response = await fetch("http://localhost:5000/logout", {
+                    credentials: "include"
+               });
+
+               const data = await response.json();
+
+               if (data.success) {
+                    window.location.href = "/signin";
+               } else {
+                    console.error("Logout failed");
+               }
+          }
+          catch (e) {
+               console.error(e);
+          }
+     };
+
+
      return (
 
 
@@ -60,12 +80,11 @@ export default function Header() {
                                    <span className="p-2 m-auto bg-transparent" id="">
                                         <i>{user?.email}</i>
                                    </span>
-                                   {!status?
-                                        <Link to="/signin" className="btn btn btn-primary rounded-pill btn-sm">Login</Link>
-                                  :
-                                   <button className="btn btn-danger rounded-pill btn-sm" type="button">
+
+                                   <button className="btn btn-danger rounded-pill btn-sm" type="button" onClick={logout}>
                                         Logout
-                                   </button>}
+                                   </button>
+
                               </form>
                          </div>
 

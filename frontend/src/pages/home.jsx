@@ -27,109 +27,259 @@ export default function Home() {
      const [totalMovies, setTotalMovies] = useState(0);
      const [totalUsers, setTotalUsers] = useState(0);
 
+     const [transToEdit, setTransToEdit] = useState(null);
+     const [genToEdit, setGenToEdit] = useState(null);
+
+     const [loading, setLoading] = useState(false);
+     const [newSerieAlert, setNewSerieAlert] = useState("");
+     const [newSerieSending, setNewSerieSending] = useState(false);
+
+     const [fillAll, setFillAll] = useState(false);
 
 
 
+     const [newGenreName, setNewGenreName] = useState("");
+     const [newSerieTitle, setNewSerieTitle] = useState("");
+     const [newSerieTranslator, setNewSerieTranslator] = useState("");
+     const [newSerieGenre, setNewSerieGenre] = useState("");
+     const [sendingNewGenre, setSendingNewGenre] = useState(false);
+     const [newGenreAlert, setNewGenreAlert] = useState("");
+
+     const [title, setTitle] = useState("");
+     const [serieDescription, setSerieDescription] = useState("");
+     const [serieYear, setSerieYear] = useState("");
+     const [serieCountry, setSerieCountry] = useState("");
+     const [serieThumbnail, setSerieThumbnail] = useState("");
+
+
+
+
+     async function getData() {
+          try {
+
+               setLoadingData(true);
+
+               const [
+                    movRes,
+                    genRes,
+                    transRes,
+                    recRes,
+                    trendRes,
+                    seriesRes,
+                    usersRes
+               ] = await Promise.all([
+                    fetch("https://irebero.pensinova.workers.dev/movies"),
+                    fetch("https://irebero.pensinova.workers.dev/genres"),
+                    fetch("https://irebero.pensinova.workers.dev/translators"),
+                    fetch("https://irebero.pensinova.workers.dev/movies/recent"),
+                    fetch("https://irebero.pensinova.workers.dev/movies/trending"),
+                    fetch("https://irebero.pensinova.workers.dev/series"),
+                    fetch("https://irebero.pensinova.workers.dev/users")
+               ]);
+
+               const [
+                    movies,
+                    genres,
+                    translators,
+                    recentMovies,
+                    trendingMovies,
+                    series,
+                    usrs
+               ] = await Promise.all([
+                    movRes.json(),
+                    genRes.json(),
+                    transRes.json(),
+                    recRes.json(),
+                    trendRes.json(),
+                    seriesRes.json(),
+                    usersRes.json(),
+               ]);
+
+               setMovies(movies);
+               setGenres(genres);
+               setTranslators(translators);
+               setRecentMovies(recentMovies);
+               setTrendingMovies(trendingMovies);
+               setSeries(series);
+               setUsers(usrs);
+
+
+
+               const totalMovies = movies.length;
+
+               const totalViews = movies.reduce(
+                    (sum, movie) => sum + (Number(movie.views) || 0),
+                    0
+               );
+
+               const totalDownloads = movies.reduce(
+                    (sum, movie) => sum + (Number(movie.downloads) || 0),
+                    0
+               );
+
+               const mostViewed = [...movies].sort(
+                    (a, b) => (Number(b.views) || 0) - (Number(a.views) || 0)
+               )[0];
+
+               const mostDownloaded = [...movies].sort(
+                    (a, b) => (Number(b.downloads) || 0) - (Number(a.downloads) || 0)
+               )[0];
+
+               const mostRecent = [...movies].sort(
+                    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+               )[0];
+
+
+               setTotalDownloads(totalDownloads);
+               setTotalMovies(totalMovies);
+               setTotalUsers(usrs.length);
+               setTotalViewed(totalViews);
+
+               setMostDownloaded(mostDownloaded);
+               setMostViewed(mostViewed);
+               setMostRecent(mostRecent);
+
+
+
+          } catch (err) {
+               console.error("Fetching Error:", err);
+          }
+
+
+          setLoadingData(false);
+     }
 
      useEffect(() => {
-          async function getData() {
-               try {
 
-                    setLoadingData(true);
-
-                    const [
-                         movRes,
-                         genRes,
-                         transRes,
-                         recRes,
-                         trendRes,
-                         seriesRes,
-                         usersRes
-                    ] = await Promise.all([
-                         fetch("https://irebero.pensinova.workers.dev/movies"),
-                         fetch("https://irebero.pensinova.workers.dev/genres"),
-                         fetch("https://irebero.pensinova.workers.dev/translators"),
-                         fetch("https://irebero.pensinova.workers.dev/movies/recent"),
-                         fetch("https://irebero.pensinova.workers.dev/movies/trending"),
-                         fetch("https://irebero.pensinova.workers.dev/series"),
-                         fetch("https://irebero.pensinova.workers.dev/users")
-                    ]);
-
-                    const [
-                         movies,
-                         genres,
-                         translators,
-                         recentMovies,
-                         trendingMovies,
-                         series,
-                         usrs
-                    ] = await Promise.all([
-                         movRes.json(),
-                         genRes.json(),
-                         transRes.json(),
-                         recRes.json(),
-                         trendRes.json(),
-                         seriesRes.json(),
-                         usersRes.json(),
-                    ]);
-
-                    setMovies(movies);
-                    setGenres(genres);
-                    setTranslators(translators);
-                    setRecentMovies(recentMovies);
-                    setTrendingMovies(trendingMovies);
-                    setSeries(series);
-                    setUsers(usrs);
-
-
-
-                    const totalMovies = movies.length;
-
-                    const totalViews = movies.reduce(
-                         (sum, movie) => sum + (Number(movie.views) || 0),
-                         0
-                    );
-
-                    const totalDownloads = movies.reduce(
-                         (sum, movie) => sum + (Number(movie.downloads) || 0),
-                         0
-                    );
-
-                    const mostViewed = [...movies].sort(
-                         (a, b) => (Number(b.views) || 0) - (Number(a.views) || 0)
-                    )[0];
-
-                    const mostDownloaded = [...movies].sort(
-                         (a, b) => (Number(b.downloads) || 0) - (Number(a.downloads) || 0)
-                    )[0];
-
-                    const mostRecent = [...movies].sort(
-                         (a, b) => new Date(b.created_at) - new Date(a.created_at)
-                    )[0];
-
-
-                    setTotalDownloads(totalDownloads);
-                    setTotalMovies(totalMovies);
-                    setTotalUsers(usrs.length);
-                    setTotalViewed(totalViews);
-
-                    setMostDownloaded(mostDownloaded);
-                    setMostViewed(mostViewed);
-                    setMostRecent(mostRecent);
-
-
-
-               } catch (err) {
-                    console.error("Fetching Error:", err);
-               }
-
-
-               setLoadingData(false);
-          }
 
           getData();
      }, []);
 
+
+
+     const saveTrans = async () => {
+
+          if (transToEdit) {
+
+               setLoading(true)
+
+               const update = await fetch(`https://irebero.pensinova.workers.dev/edittranslator?id=${transToEdit.id}&name=${transToEdit.name}`);
+
+               const result = await update.json();
+
+               if (result.success) {
+
+                    getData();
+                    setTransToEdit(null);
+
+               }
+               else {
+                    alert(result.message || "Failed to update translator");
+               }
+               setLoading(false);
+
+          }
+          else {
+               alert("Select translator to edit");
+          }
+     }
+
+
+
+     // NEW GENRE
+     const submitGenre = async (e) => {
+
+          e.preventDefault();
+
+          setSendingNewGenre(true)
+          setNewGenreAlert("");
+          const res = await fetch(`https://irebero.pensinova.workers.dev/newgenre?name=${newGenreName}`);
+
+
+          const result = await res.json();
+
+
+
+          if (result.success === true) {
+               setNewGenreName("");
+               setNewGenreAlert("Genre added successfully!");
+
+
+          }
+          else {
+               setNewGenreAlert(result.message);
+          }
+
+          setSendingNewGenre(false);
+          setTimeout(() => {
+
+               setNewGenreAlert("");
+
+          }, 5000);
+     }
+
+     // NEW SERIES
+     const HandleSubmitSerie = async (e) => {
+          setFillAll(false);
+
+          if (newSerieTitle === "" ||
+               newSerieTranslator === "" ||
+               newSerieGenre === "" ||
+               serieCountry === "" ||
+               serieYear === "" ||
+               serieDescription === "" ||
+               serieThumbnail === ""
+          ) {
+
+               setFillAll(true);
+          }
+
+          else {
+               setFillAll(false);
+
+               setNewSerieAlert("");
+               setNewSerieSending(true)
+
+               const res = await fetch(`https://irebero.pensinova.workers.dev/newserie?title=${newSerieTitle}&translator=${newSerieTranslator}&genre=${newSerieGenre}&description=${serieDescription}&year=${serieYear}&country=${serieCountry}&thumbnail=${serieThumbnail}`);
+
+
+               const result = await res.json();
+
+
+
+               if (result.success === true) {
+                    setNewSerieTitle("");
+                    setNewSerieAlert("Series added successfully!");
+                    setSerieCountry("");
+                    setSerieYear("");
+                    setSerieThumbnail("");
+                    setNewSerieTranslator("");
+                    setNewSerieGenre("");
+
+                    setTimeout(() => {
+
+                         setNewSerieAlert("");
+
+                    }, 5000);
+
+
+               }
+               else {
+                    setNewSerieAlert(result.message);
+               }
+
+               setNewSerieSending(false);
+
+
+               setTimeout(() => {
+
+                    setNewSerieAlert("");
+
+               }, 5000);
+
+
+          }
+     }
 
 
 
@@ -275,13 +425,17 @@ export default function Home() {
 
                               <div className="col-md-6">
                                    <h4>Translators</h4>
-                                   <div className="table-responsive rounded shadow" style={{ maxHeight: 500 }}>
+                                   <div className="table-responsive rounded shadow" style={{ height: 400 }}>
                                         <table className="table">
                                              <thead>
                                                   <tr>
                                                        <th>#</th>
                                                        <th>Name</th>
-                                                       <th>Action</th>
+                                                       <th className="text-end">
+                                                            <button className="btn btn-outline-primary rounded-5">
+                                                                 <i class="bi bi-plus-circle"></i>
+                                                            </button>
+                                                       </th>
 
                                                   </tr>
                                              </thead>
@@ -291,20 +445,59 @@ export default function Home() {
                                                        translators.map((items, i) => (
                                                             <tr key={i}>
                                                                  <td>{items.id}</td>
-                                                                 <td>{items.name}</td>
+
+
+
+                                                                 <td>
+                                                                      {transToEdit && transToEdit.id === items.id ? (
+                                                                           <input
+                                                                                autoFocus
+                                                                                type="text"
+                                                                                className="form-control border-primary shadow-sm"
+                                                                                value={transToEdit.name}
+                                                                                onChange={(e) => {
+                                                                                     setTransToEdit({ ...items, name: e.target.value });
+                                                                                }}
+
+                                                                           />) :
+                                                                           <> {items.name}</>
+                                                                      }
+                                                                 </td>
                                                                  <td className="text-end">
 
                                                                       <div className="btn-group">
 
 
+                                                                           {transToEdit && transToEdit.id === items.id ?
 
-                                                                           <Link
-                                                                                to={`/movies/${items.id}/edit`}
-                                                                                className="btn btn-sm btn-outline-secondary"
-                                                                                title="Edit"
-                                                                           >
-                                                                                <i className="bi bi-pencil"></i>
-                                                                           </Link>
+                                                                                !loading ?
+                                                                                     (<button
+                                                                                          onClick={() => saveTrans()}
+                                                                                          className="btn btn-sm btn-primary"
+                                                                                          type="submit"
+                                                                                     >
+                                                                                          <i className="bi bi-floppy"></i>
+                                                                                     </button>) :
+                                                                                     (
+                                                                                          <button
+                                                                                               className="btn btn-sm btn-primary"
+
+                                                                                          >
+                                                                                               <div className="spinner-border spinner-border-sm" role="status">
+                                                                                                    <span className="visually-hidden">Loading...</span>
+                                                                                               </div>
+                                                                                          </button>
+                                                                                     )
+                                                                                :
+
+                                                                                <button
+                                                                                     onClick={() => setTransToEdit(items)}
+                                                                                     className="btn btn-sm btn-outline-secondary"
+                                                                                >
+                                                                                     <i className="bi bi-pencil"></i>
+                                                                                </button>}
+
+
 
                                                                            <button
                                                                                 className="btn btn-sm btn-outline-danger"
@@ -328,6 +521,7 @@ export default function Home() {
                                                                       </div>
 
                                                                  </td>
+
                                                             </tr>
                                                        ))
                                                   }
@@ -341,15 +535,21 @@ export default function Home() {
 
                               <div className="col-md-6">
                                    <h4>Genres</h4>
-                                   <div className="table-responsive rounded shadow" style={{ maxHeight: 500 }}>
+                                   <div className="table-responsive rounded shadow" style={{ height: 400 }}>
                                         <table className="table">
                                              <thead>
                                                   <tr>
                                                        <th>#</th>
                                                        <th>Name</th>
-                                                       <th>Actions</th>
+                                                       <th className="text-end">
+                                                            <button className="btn btn-outline-success rounded-5">
+                                                                 <i class="bi bi-plus-circle"></i>
+                                                            </button>
+                                                       </th>
                                                   </tr>
                                              </thead>
+
+
                                              <tbody>
                                                   {
                                                        genres.map((gen, i) => (
@@ -490,6 +690,217 @@ export default function Home() {
                     </div>
 
                </div>
+
+
+
+
+
+               {/* ------ NEW GENRE ----- */}
+               <div className="modal fade bg-dark" id="newGenre" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="newGenreLabel" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered">
+                         <div className="modal-content bg-secondary text-light p-3">
+                              <div className="d-flex justify-content-between">
+                                   <h1 className="modal-title fs-5" id="newGenreLabel">New Genre</h1>
+                                   <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              {
+                                   newGenreAlert && (
+                                        <div className="alert alert-success alert-dismissible fade show mt-2" role="alert">
+                                             {newGenreAlert}
+                                             <button type="button" className="btn-close" data-bs-dismiss="alert"></button>
+                                        </div>
+                                   )
+                              }
+
+                              <form action="" className="form" onSubmit={submitGenre}>
+                                   <div className="modal-body my-3">
+
+
+                                        <label htmlFor="name">Genre:</label>
+                                        <input type="text"
+                                             className="form-control mt-2"
+                                             placeholder="Enter Genre Name"
+                                             value={newGenreName}
+                                             onChange={(e) => setNewGenreName(e.target.value)}
+                                             required />
+
+
+                                   </div>
+                                   <div className="d-flex justify-content-center">
+                                        <button type="button" className="btn btn-sm btn-danger m-1" data-bs-dismiss="modal">Close</button>
+                                        {sendingNewGenre ?
+                                             <button type="submit" className="btn btn-sm btn-info m-1" disabled>Sending...</button> :
+                                             <button type="submit" className="btn btn-sm btn-primary m-1">Submit</button>
+                                        }
+                                   </div>
+                              </form>
+                         </div>
+                    </div>
+               </div>
+
+
+
+
+               {/* -----NEW SERIE ----- */}
+               <div className="modal fade bg-dark" id="newSerie" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="newSerieLabel" aria-hidden="true">
+                    <div className="modal-dialog modal-dialog-centered">
+                         <div className="modal-content bg-primary-subtle">
+
+                              <div className="p-3">
+
+                                   <div className="d-flex justify-content-between">
+                                        <h1 className="modal-title fs-5" id="newSerieLabel">Add New Serie</h1>
+                                        <button type="button" className="btn-close text-danger" data-bs-dismiss="modal"></button>
+                                   </div>
+
+                                   {
+                                        newSerieAlert && (
+                                             <div className="alert alert-success alert-dismissible fade show mt-2" role="alert">
+                                                  {newSerieAlert}
+                                                  <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                             </div>
+                                        )
+                                   }
+
+
+                                   {
+                                        fillAll && (
+                                             <div className="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                                                  Fill Fields please
+                                                  <button type="button" className="btn-close" data-bs-dismiss="alerrt" aria-label="Cloose" onClick={() => setFillAll(false)} />                                            </div>
+                                        )
+                                   }
+
+                                   <form action="" className="form">
+                                        <div className="modal-body">
+
+                                             <div className="mb-0">
+                                                  <label className="form-label mt-1">Thumbnail<span className="text-danger">*</span></label>
+                                                  <input id="thumbnail" type="file" className="form-control" accept="image/*" name="thumb"
+                                                       onChange={(e) => { setNewSerieTitle(e.target.files[0].name.split(".")[0]); setSerieThumbnail(e.target.files[0].name); uploadThumbnail(e.target.files[0]) }} />
+
+                                                  <div className="row mt-1 g-2">
+                                                       <div className="col-md-8" id="uploadingThumbnail">
+
+
+
+                                                            {uploadingThumbnail === true && (
+                                                                 <div className="alert alert-info">
+                                                                      <div className="spinner-border spinner-border-sm me-1" role="status">
+                                                                           <span className="visually-hidden small">Loading...</span>
+                                                                      </div>
+                                                                      Uploading Thumbnail...
+                                                                 </div>
+
+                                                            )}
+
+
+                                                            {/* success */}
+                                                            {uploadingThumbnailSuccess.success === true &&
+                                                                 <div className="alert alert-success alert-dismissible fade show" role="alert">
+                                                                      <i className="bi bi-check-circle"></i> Image Uploaded Successfully.
+                                                                      <button type="button" className="btn-close" data-bs-dismiss="alert"></button>
+                                                                 </div>}
+
+                                                            {uploadingThumbnailSuccess.success === false &&
+                                                                 <div className="alert alert-danger alert-dismissible fade show" role="alert">
+                                                                      <i className="bi bi-x-circle text-danger"></i> {uploadingThumbnailSuccess.message}
+                                                                      <button type="button" className="btn-close" data-bs-dismiss="alert"></button>
+                                                                 </div>
+                                                            }
+
+
+                                                       </div>
+                                                       <div className="col-md-4 preview-box" id="previewThumbnail">
+
+                                                            {thumbnailUrl &&
+                                                                 (<img src={thumbnailUrl} className="img-fluid rounded shadow" style={{
+                                                                      maxHeight: 100,
+                                                                      width: "100%",
+                                                                      // height: "300px",
+                                                                      background: "black",
+                                                                      objectFit: "cover"
+                                                                 }} alt="Thumbnail" />
+                                                                 )}
+                                                       </div>
+                                                  </div>
+                                             </div>
+
+                                             <label htmlFor="serieTitle">Title:</label>
+                                             <input type="text" className="form-control" id="serieTitle" required placeholder="Serie Title"
+                                                  value={newSerieTitle} onChange={e => setNewSerieTitle(e.target.value)} />
+
+                                             <label htmlFor="serieTrans" className="mt-1">Translator:</label>
+                                             <select
+                                                  name="translator"
+                                                  id="serieTrans"
+                                                  className="form-select"
+                                                  required
+                                                  value={newSerieTranslator}
+                                                  onChange={(e) => setNewSerieTranslator(e.target.value)}
+                                             >
+                                                  <option value="" disabled>Select</option>
+                                                  {
+                                                       translators?.map((item) => (
+                                                            <option value={item.id} key={item.id}>{item.name}</option>
+                                                       ))
+                                                  }
+                                             </select>
+
+
+
+
+                                             <label htmlFor="serieGenre" className="mt-1">Genre:</label>
+                                             <select
+                                                  name="genre"
+                                                  id="serieGenre"
+                                                  className="form-select"
+                                                  required
+                                                  value={newSerieGenre}
+                                                  onChange={(e) => setNewSerieGenre(e.target.value)}
+                                             >
+
+                                                  <option value="" disabled>Select</option>
+                                                  {
+                                                       genres?.map((item) => (
+                                                            <option value={item.id} key={item.id}>{item.name}</option>
+                                                       ))
+                                                  }
+                                             </select>
+
+
+                                             <label htmlFor="serieCountry" className="mt-1">Country:</label>
+                                             <input type="text" className="form-control" placeholder="Country" value={serieCountry} onChange={(e) => setSerieCountry(e.target.value)} />
+
+
+                                             <label htmlFor="serieYear" className="mt-1">Year:</label>
+                                             <input type="number" className="form-control" placeholder="Year" value={serieYear} onChange={(e) => setSerieYear(e.target.value)} />
+
+
+                                             <label htmlFor="serieYear" className="mt-1">Description:</label>
+                                             <textarea name="description" id="serieDescription" rows="3"
+                                                  className="form-control" placeholder="Description" value={serieDescription} onChange={(e) => setSerieDescription(e.target.value)}></textarea>
+
+                                        </div>
+
+
+
+                                        <div className="d-flex justify-content-center">
+                                             <button type="button" className="btn btn-warning btn-sm m-1" data-bs-dismiss="modal">Close</button>
+
+                                             {
+                                                  newSerieSending ?
+                                                       <button type="button" className="btn btn-info btn-sm m-1" disabled>Sending...</button> :
+                                                       <button type="button" onClick={HandleSubmitSerie} className="btn btn-primary btn-sm m-1">Submit</button>
+                                             }
+                                        </div>
+                                   </form>
+                              </div>
+
+                         </div>
+                    </div>
+               </div>
+
 
           </div>
      )

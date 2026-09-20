@@ -7,9 +7,14 @@ export default function SignIn() {
   const navigate = useNavigate();
 
 
+  const [loading, setLoading] = useState(false);
+
+
 
 
   const checkLogin = async () => {
+
+
 
     try {
 
@@ -44,8 +49,12 @@ export default function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+
     const email = document.getElementById("email").value;
     const password = document.getElementById("floatingPassword").value;
+
+
+    setLoading(true);
 
     try {
       const response = await fetch(`http://localhost:5000/getLogin?email=${email}&password=${password}`,
@@ -71,6 +80,8 @@ export default function SignIn() {
       console.error(e);
     }
 
+    setLoading(false);
+
   }
 
 
@@ -92,6 +103,7 @@ export default function SignIn() {
               className="form-control"
               id="email"
               placeholder="Email address"
+              required
             />
             <label for="floatingInput">Email address</label>
           </div>
@@ -102,27 +114,22 @@ export default function SignIn() {
               className="form-control"
               id="floatingPassword"
               placeholder="Password"
+              required
             />
             <label for="floatingPassword">Password</label>
           </div>
 
-          <div className="form-check text-start my-3">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              value="remember-me"
-              id="checkDefault"
-            />
-            <label className="form-check-label" for="checkDefault">
-              Remember me
-            </label>
+          <div className="mt-2">
+
+            {/* <Link className="btn btn-danger me-2 py-2" to="/">
+              Ca
+            </Link> */}
+            <button className="btn btn-primary py-2" type="submit" disabled={loading}>
+              {loading ? "Loading..." : "Sign in"}
+            </button>
           </div>
-          <Link className="btn btn-danger me-2 py-2" to="/">
-            Back
-          </Link>
-          <button className="btn btn-primary py-2" type="submit">
-            Sign in
-          </button>
+
+
         </form>
       </main>
 
