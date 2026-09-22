@@ -31,6 +31,12 @@ export default function Home() {
      const [transToEdit, setTransToEdit] = useState(null);
      const [genToEdit, setGenToEdit] = useState(null);
 
+
+     const [transToDelete, setTransToDelete] = useState(null);
+     const [genToDelete, setGenToDelete] = useState(null);
+
+
+
      const [loading, setLoading] = useState(false);
      const [newSerieAlert, setNewSerieAlert] = useState("");
      const [newSerieSending, setNewSerieSending] = useState(false);
@@ -255,6 +261,8 @@ export default function Home() {
 
 
      const deleteTranslator = async (id, name) => {
+
+          setTransToDelete(id);
 
           if (
                window.confirm(
@@ -565,7 +573,7 @@ export default function Home() {
                                                   {
                                                        genres.map((gen, i) => (
                                                             <tr key={i}>
-                                                                 <td>{i+1}</td>
+                                                                 <td>{i + 1}</td>
                                                                  <td>{gen.name}</td>
                                                                  <td className="text-end">
 
@@ -638,15 +646,21 @@ export default function Home() {
                                         </thead>
 
                                         <tbody id="table-data">
-                                             {recentMovies.map((item) => (
+                                             {recentMovies.map((item, i) => (
                                                   <tr key={item.id}>
-                                                       <td>{item.id}</td>
-                                                       <td>{item.title}</td>
-                                                       <td>{item.genre}</td>
-                                                       <td>{item.translator}</td>
-                                                       <td>{item.views}</td>
-                                                       <td>{item.downloads}</td>
-                                                       <td className="text-end">
+
+                                                       <td>
+                                                            <img
+                                                                 src={`${thumbnailBase}${item.thumbnail}`} alt=""
+                                                                 width={50} class="rounded float-start" />
+                                                       </td>
+
+                                                       <td valign="middle"><b>{item.title}</b></td>
+                                                       <td valign="middle">{item.genre}</td>
+                                                       <td valign="middle">{item.translator}</td>
+                                                       <td valign="middle">{item.views}</td>
+                                                       <td valign="middle">{item.downloads}</td>
+                                                       <td valign="middle" className="text-end">
 
                                                             <div className="btn-group">
 
@@ -659,7 +673,8 @@ export default function Home() {
                                                                  </Link>
 
                                                                  <Link
-                                                                      to={`/movies/${item.id}/edit`}
+                                                                      to="editmovie"
+                                                                      state={{ movie: item }}
                                                                       className="btn btn-sm btn-outline-secondary"
                                                                       title="Edit"
                                                                  >

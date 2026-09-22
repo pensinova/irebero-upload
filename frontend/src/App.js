@@ -8,15 +8,17 @@ import Movies from './pages/movies';
 import { useEffect, useState } from 'react';
 import Navigate from './navigator';
 import { useAuth } from './authContext';
+import EditMovie from './pages/editMovie';
 
 
 
 
 function App() {
 
-const { user, loading } = useAuth();
+  const { user, loading } = useAuth();
 
-    console.log(user);
+  console.log(user);
+
 
 
 
@@ -33,9 +35,12 @@ const { user, loading } = useAuth();
         <Route path="/upload" element={<Navigate to="/upload"><Upload /></Navigate>} />
 
         <Route path="movies" element={<Navigate to="/movies"><Movies /></Navigate>} />
+        <Route path="editmovie" element={<Navigate to="/editmovie"><EditMovie /></Navigate>} />
 
 
         <Route path="/signin" element={<Signin />} />
+
+
         <Route path='/*' element={<Navigate to="/"><Lost /></Navigate>} />
 
       </Routes>
