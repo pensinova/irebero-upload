@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "../components/header";
 
+const thumbnailBase = "https://pub-4ebd8b355f6048948a58511af22de131.r2.dev/";
+
 const Movies = () => {
      const [movies, setMovies] = useState([]);
      const [loading, setLoading] = useState(false);
@@ -271,7 +273,10 @@ const Movies = () => {
                                                   <tr key={movie.id || index}>
 
                                                        <td>
-                                                            {index + 1}
+                                                            <img src={`${thumbnailBase}${movie.thumbnail}`}
+                                                                 alt="Thumbnail"
+                                                                 className="img-thumbnail"
+                                                                 width={60} />
                                                        </td>
 
                                                        <td>
@@ -307,15 +312,25 @@ const Movies = () => {
                                                             <div className="btn-group">
 
                                                                  <Link
-                                                                      to={`/movies/${movie.id}`}
+                                                                      to="/play"
+                                                                      state={{ video:movie }}
                                                                       className="btn btn-sm btn-outline-primary"
-                                                                      title="View"
+                                                                      title="Play"
                                                                  >
-                                                                      <i className="bi bi-eye"></i>
+                                                                      <i className="bi bi-play-btn"></i>
                                                                  </Link>
 
                                                                  <Link
-                                                                      to={`/movies/${movie.id}/edit`}
+                                                                      to={`/movies/${movie.id}`}
+                                                                      className="btn btn-sm btn-outline-primary"
+                                                                      title="Hide"
+                                                                 >
+                                                                      <i className="bi bi-eye-slash"></i>
+                                                                 </Link>
+
+                                                                 <Link
+                                                                      to="/editmovie"
+                                                                      state={{ movie }}
                                                                       className="btn btn-sm btn-outline-secondary"
                                                                       title="Edit"
                                                                  >

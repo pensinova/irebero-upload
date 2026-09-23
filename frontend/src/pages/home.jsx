@@ -34,6 +34,10 @@ export default function Home() {
 
      const [transToDelete, setTransToDelete] = useState(null);
      const [genToDelete, setGenToDelete] = useState(null);
+     const [loadingGen, setLoadingGen] = useState(false);
+
+     const [serieToDelete, setSerieToDelete] = useState(null);
+     const [loadingSerie, setLoadingSerie] = useState(false);
 
 
 
@@ -283,7 +287,7 @@ export default function Home() {
                     if (result.success === true) {
 
                          getData();
-
+                         setTransToDelete(null);
                     }
                     else {
                          alert(result.message);
@@ -298,6 +302,123 @@ export default function Home() {
           }
 
 
+     }
+
+
+     const editGen = async () => {
+
+          if (genToEdit) {
+
+               setLoadingGen(true)
+
+               const update = await fetch(`https://irebero.pensinova.workers.dev/editgenre?id=${genToEdit.id}&name=${genToEdit.name}`);
+
+               const result = await update.json();
+
+               if (result.success) {
+
+                    getData();
+                    setGenToEdit(null);
+
+                    alert(result.message);
+               }
+               else {
+                    alert(result.message || "Failed to update genre");
+               }
+               setLoadingGen(false);
+
+          }
+          else {
+               alert("Select genre to edit");
+          }
+     }
+
+     const deleteGenre = async (id, name) => {
+
+
+          if (id) {
+
+               if (
+                    window.confirm(
+                         `Delete "${name}"?`
+                    )
+               ) {
+
+                    setLoadingGen(true);
+                    setGenToDelete(id);
+
+                    try {
+
+                         const send = await fetch(`${workerUrl}deletegenre?id=${id}&name=${name}`);
+
+                         const results = await send.json();
+
+                         if (results.success) {
+                              getData();
+                              // alert(results.message);
+
+                              setGenToDelete(null);
+
+
+                         }
+                    }
+                    catch (e) {
+                         alert("Failed: ", e.message);
+                    }
+                    setLoadingGen(false);
+
+
+               }
+
+          }
+          else {
+               alert("Select genre to delete!");
+          }
+     }
+
+
+
+     const deleteSerie = async (id, name) => {
+
+
+          if (id) {
+
+               if (
+                    window.confirm(
+                         `Are you sure you want to delete Serie "${name}"? NB: This will delete all episodes from database and it is cannot be UNDONE.`
+                    )
+               ) {
+
+                    setLoadingSerie(true);
+                    setSerieToDelete(id);
+
+                    try {
+
+                         const send = await fetch(`${workerUrl}deleteserie?id=${id}&name=${name}`);
+
+                         const results = await send.json();
+
+                         if (results.success) {
+                              getData();
+
+                              alert(results.message);
+                              setSerieToDelete(null);
+
+
+                         }
+                    }
+                    catch (e) {
+                         alert("Failed: ", e.message);
+                    }
+                    setLoadingSerie(false);
+
+
+               }
+
+          }
+          else {
+               alert("Select Serie to delete!");
+          }
      }
 
 
@@ -438,10 +559,10 @@ export default function Home() {
 
 
 
-                         <div className="row g-3h mt-5">
+                         <div className="row g-2 mt-5">
 
 
-                              <div className="col-md-6">
+                              <div className="col-md-4">
                                    <h4>Translators</h4>
                                    <div className="table-responsive rounded shadow" style={{ height: 400 }}>
                                         <table className="table">
@@ -516,26 +637,21 @@ export default function Home() {
                                                                                 </button>}
 
 
-                                                                           {
-                                                                                !loading ?
 
-                                                                                     <button
-                                                                                          className="btn btn-sm btn-outline-danger"
-                                                                                          title="Delete"
-                                                                                          onClick={() => deleteTranslator(items.id, items.name)}
-                                                                                     >
-                                                                                          <i className="bi bi-trash"></i>
-                                                                                     </button> :
-                                                                                     <button
-                                                                                          className="btn btn-sm btn-outline-danger"
-                                                                                          title="Delete"
-                                                                                          disabled={loading}
-                                                                                     >
-                                                                                          <div className="spinner-border spinner-border-sm" role="status">
-                                                                                               <span className="visually-hidden">Loading...</span>
-                                                                                          </div>
-                                                                                     </button>
-                                                                           }
+                                                                           <button
+                                                                                className="btn btn-sm btn-outline-danger"
+                                                                                title="Delete"
+                                                                                onClick={() => deleteTranslator(items.id, items.name)}
+                                                                                disabled={loading}
+                                                                           >
+                                                                                {loading && transToDelete === items.id ?
+                                                                                     <div className="spinner-border spinner-border-sm" role="status">
+                                                                                          <span className="visually-hidden">Loading...</span>
+                                                                                     </div>
+                                                                                     :
+                                                                                     <i className="bi bi-trash"></i>}
+                                                                           </button>
+
 
                                                                       </div>
 
@@ -552,7 +668,7 @@ export default function Home() {
                               </div>
 
 
-                              <div className="col-md-6">
+                              <div className="col-md-4">
                                    <h4>Genres</h4>
                                    <div className="table-responsive rounded shadow" style={{ height: 400 }}>
                                         <table className="table">
@@ -574,43 +690,156 @@ export default function Home() {
                                                        genres.map((gen, i) => (
                                                             <tr key={i}>
                                                                  <td>{i + 1}</td>
-                                                                 <td>{gen.name}</td>
+                                                                 <td>
+                                                                      {genToEdit?.id === gen.id ?
+
+                                                                           <input type="text" autoFocus className="form-control"
+                                                                                value={genToEdit.name}
+                                                                                onChange={(e) => {
+                                                                                     setGenToEdit({ ...gen, name: e.target.value });
+                                                                                }} /> :
+
+                                                                           <>{gen.name}</>}</td>
                                                                  <td className="text-end">
 
                                                                       <div className="btn-group">
 
+                                                                           {genToEdit?.id === gen.id ?
 
+                                                                                <button className="btn btn-sm btn-primary"
+                                                                                     disabled={loadingGen}
+                                                                                     onClick={editGen}>
+                                                                                     {!loadingGen ?
+                                                                                          <i className="bi bi-floppy"></i> :
+                                                                                          <div className="spinner-border spinner-border-sm" role="status">
+                                                                                               <span className="visually-hidden">Loading...</span>
+                                                                                          </div>}
 
-                                                                           <Link
-                                                                                to={`/movies/${gen.id}/edit`}
-                                                                                className="btn btn-sm btn-outline-secondary"
-                                                                                title="Edit"
-                                                                           >
-                                                                                <i className="bi bi-pencil"></i>
-                                                                           </Link>
+                                                                                </button> :
 
+                                                                                <button
+                                                                                     onClick={() => setGenToEdit(gen)}
+                                                                                     className="btn btn-sm btn-outline-secondary"
+                                                                                     title="Edit"
+                                                                                >
+                                                                                     <i className="bi bi-pencil"></i>
+                                                                                </button>
+                                                                           }
                                                                            <button
                                                                                 className="btn btn-sm btn-outline-danger"
                                                                                 title="Delete"
-                                                                                onClick={() => {
-                                                                                     if (
-                                                                                          window.confirm(
-                                                                                               `Delete "${gen.name}"?`
-                                                                                          )
-                                                                                     ) {
-                                                                                          console.log(
-                                                                                               "Delete genre:",
-                                                                                               gen.id
-                                                                                          );
-                                                                                     }
-                                                                                }}
+                                                                                onClick={() => deleteGenre(gen.id, gen.name)}
+                                                                                disabled={loadingGen && genToDelete === gen.id}
                                                                            >
-                                                                                <i className="bi bi-trash"></i>
+                                                                                {loadingGen && genToDelete === gen.id ?
+                                                                                     <div className="spinner-border spinner-border-sm" role="status">
+                                                                                          <span className="visually-hidden">Loading...</span>
+                                                                                     </div> :
+                                                                                     <i className="bi bi-trash"></i>
+                                                                                }
                                                                            </button>
 
                                                                       </div>
 
                                                                  </td>
+                                                            </tr>
+                                                       ))
+                                                  }
+                                             </tbody>
+
+
+                                        </table>
+                                   </div>
+                              </div>
+
+
+                              <div className="col-md-4">
+                                   <h4>Series</h4>
+                                   <div className="table-responsive rounded shadow" style={{ height: 400 }}>
+                                        <table className="table">
+                                             <thead>
+                                                  <tr>
+                                                       <th>#</th>
+                                                       <th>Title</th>
+
+                                                       <th className="text-end">
+                                                            <span className="text-primary fs-lg" data-bs-toggle="modal" data-bs-target="#newTranslator">
+                                                                 <i class="bi bi-plus-circle"></i>
+                                                            </span>
+                                                       </th>
+
+                                                  </tr>
+                                             </thead>
+
+                                             <tbody>
+                                                  {
+                                                       series.map((items, i) => (
+                                                            <tr key={i}>
+                                                                 <td>{i + 1}</td>
+                                                                 <td>{items.title}</td>
+
+
+                                                                 <td className="text-end">
+
+                                                                      <div className="btn-group">
+
+
+                                                                           {transToEdit && transToEdit.id === items.id ?
+
+                                                                                !loading ?
+                                                                                     (<button
+                                                                                          onClick={() => saveTrans()}
+                                                                                          className="btn btn-sm btn-primary"
+                                                                                          type="submit"
+                                                                                     >
+                                                                                          <i className="bi bi-floppy"></i>
+                                                                                     </button>) :
+                                                                                     (
+                                                                                          <button
+                                                                                               className="btn btn-sm btn-primary"
+                                                                                               disabled={loading}
+                                                                                          >
+                                                                                               <div className="spinner-border spinner-border-sm" role="status">
+                                                                                                    <span className="visually-hidden">Loading...</span>
+                                                                                               </div>
+                                                                                          </button>
+                                                                                     )
+                                                                                :
+
+                                                                                <Link
+                                                                                     to="editserie"
+                                                                                     state={{ serie: items }}
+                                                                                     className="btn btn-sm btn-outline-secondary"
+                                                                                >
+                                                                                     <i className="bi bi-pencil"></i>
+                                                                                </Link>}
+
+
+                                                                           {
+                                                                                !loading ?
+
+                                                                                     <button
+                                                                                          className="btn btn-sm btn-outline-danger"
+                                                                                          title="Delete"
+                                                                                          onClick={() => deleteSerie(items.id, items.title)}
+                                                                                     >
+                                                                                          <i className="bi bi-trash"></i>
+                                                                                     </button> :
+                                                                                     <button
+                                                                                          className="btn btn-sm btn-outline-danger"
+                                                                                          title="Delete"
+                                                                                          disabled={loading}
+                                                                                     >
+                                                                                          <div className="spinner-border spinner-border-sm" role="status">
+                                                                                               <span className="visually-hidden">Loading...</span>
+                                                                                          </div>
+                                                                                     </button>
+                                                                           }
+
+                                                                      </div>
+
+                                                                 </td>
+
                                                             </tr>
                                                        ))
                                                   }
@@ -641,7 +870,7 @@ export default function Home() {
                                                   <th>Translator</th>
                                                   <th>Views</th>
                                                   <th>Downloads</th>
-                                                  <th>Action</th>
+                                                  <th></th>
                                              </tr>
                                         </thead>
 
@@ -665,12 +894,19 @@ export default function Home() {
                                                             <div className="btn-group">
 
                                                                  <Link
-                                                                      to={`/movies/${item.id}`}
+                                                                      to="/play"
+                                                                      state={{ video: item }}
                                                                       className="btn btn-sm btn-outline-primary"
-                                                                      title="View"
+                                                                      title="Play"
                                                                  >
-                                                                      <i className="bi bi-eye"></i>
+                                                                      <i className="bi bi-play-btn"></i>
                                                                  </Link>
+                                                                 <button
+                                                                      className="btn btn-sm btn-outline-primary"
+                                                                      title="Hide"
+                                                                 >
+                                                                      <i className="bi bi-eye-slash"></i>
+                                                                 </button>
 
                                                                  <Link
                                                                       to="editmovie"
@@ -680,6 +916,7 @@ export default function Home() {
                                                                  >
                                                                       <i className="bi bi-pencil"></i>
                                                                  </Link>
+
 
                                                                  <button
                                                                       className="btn btn-sm btn-outline-danger"

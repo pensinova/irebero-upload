@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 
 const thumbnailBase = "https://pub-4ebd8b355f6048948a58511af22de131.r2.dev/";
 
-const EditMovie = () => {
+const EditSerie = () => {
      const { state } = useLocation();
-     const movie = state?.movie;
+     const serie = state?.serie;
 
 
      const [uploadProgress, setUploadProgress] = useState(0);
@@ -138,7 +138,7 @@ const EditMovie = () => {
 
 
 
-     if (!movie) {
+     if (!serie) {
           return <div className="container">Movie not found.</div>;
      }
 
@@ -159,28 +159,14 @@ const EditMovie = () => {
 
                          <div className="card-header">
                               <h5>
-                                   Edit Movie <b>{movie.title}</b>
+                                   Edit Serie <b>{serie.title}</b>
                               </h5>
                          </div>
                          <div className="card-body">
 
                               <form>
 
-                                   <div className="">
-                                        <label htmlFor="url" className="form-label">
-                                             Movie URL:
-                                        </label>
-
-                                        <select name=""
-                                             className="form-select shadow-sm" id="url"
-                                             required
-                                             value={movie.video_path}>
-                                             {b2Files.map((b2, i) => (
-                                                  <option value={b2.name} key={i}>{b2.name}</option>
-                                             ))}
-                                        </select>
-
-                                   </div>
+                                   
 
                                    <div className="mt-2">
                                         <label htmlFor="thumbnail" className="form-label fw-bold">
@@ -194,7 +180,7 @@ const EditMovie = () => {
                                         />
 
 
-                                        <img src={`${thumbnailBase}${movie.thumbnail}`}
+                                        <img src={`${thumbnailBase}${serie.thumbnail}`}
                                              alt="Thumbnail"
                                              className="img-thumbnail"
                                              width={150} />
@@ -209,7 +195,7 @@ const EditMovie = () => {
                                              type="text"
                                              id="title"
                                              className="form-control shadow-sm"
-                                             defaultValue={movie.title}
+                                             defaultValue={serie.title}
                                              required
                                         />
                                    </div>
@@ -222,7 +208,7 @@ const EditMovie = () => {
                                         <select
                                              id="genre"
                                              className="form-select shadow-sm"
-                                             defaultValue={movie.genre}
+                                             defaultValue={serie.genre}
                                              required
                                         >
 
@@ -240,7 +226,7 @@ const EditMovie = () => {
                                         <select
                                              id="translator"
                                              className="form-select shadow-sm"
-                                             defaultValue={movie.translator}
+                                             defaultValue={serie.translator}
                                              required
                                         >
                                              {translators.map((trans, i) => (
@@ -258,7 +244,7 @@ const EditMovie = () => {
                                              type="number"
                                              id="year"
                                              className="form-control shadow-sm"
-                                             defaultValue={movie.year}
+                                             defaultValue={serie.year}
                                              required
                                         />
                                    </div>
@@ -272,7 +258,7 @@ const EditMovie = () => {
                                              type="text"
                                              id="country"
                                              className="form-control shadow-sm"
-                                             defaultValue={movie.country}
+                                             defaultValue={serie.country}
                                              required
                                         />
                                    </div>
@@ -286,7 +272,7 @@ const EditMovie = () => {
                                              type="text"
                                              id="language"
                                              className="form-control shadow-sm"
-                                             defaultValue={movie.language}
+                                             defaultValue={serie.language}
 
                                         />
                                    </div>
@@ -299,7 +285,7 @@ const EditMovie = () => {
                                         <select
                                              id="series"
                                              className="form-select shadow-sm"
-                                             defaultValue={movie.series}
+                                             defaultValue={serie.series}
                                              required
 
                                         >
@@ -321,7 +307,7 @@ const EditMovie = () => {
                                              id="description"
                                              className="form-control shadow-sm"
                                              rows="5"
-                                             defaultValue={movie.description}
+                                             defaultValue={serie.description}
                                              required
                                         ></textarea>
                                    </div>
@@ -345,4 +331,4 @@ const EditMovie = () => {
      );
 };
 
-export default EditMovie;
+export default EditSerie;

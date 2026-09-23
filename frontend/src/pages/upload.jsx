@@ -49,6 +49,16 @@ export default function Upload() {
      const [fillAll, setFillAll] = useState(false);
 
 
+     const [serie, setSerie] = useState("");
+     const [genre, setGenre] = useState("");
+     const [translator, setTranslator] = useState("");
+     const [year, setyear] = useState("");
+     const [country, setCountry] = useState("");
+     const [description, setDescription] = useState("");
+     const [language, setLanguage] = useState("");
+
+
+
 
      // FETCHES
 
@@ -509,7 +519,7 @@ export default function Upload() {
           if (!file) return;
 
           const imageUrl = URL.createObjectURL(file);
-          setThumbnailUrl(imageUrl);
+          setThumbnailUrl(file.name);
 
 
           const formData = new FormData();
@@ -552,6 +562,9 @@ export default function Upload() {
           }
      }
 
+
+
+
      const uploadDB = async (e) => {
           e.preventDefault();
 
@@ -565,40 +578,49 @@ export default function Upload() {
                return;
           }
 
-          const form = e.currentTarget;
 
-          const data = {
-               title: title.trim(),
-               description: form.description.value.trim(),
-               genre: form.genre.value,
-               language: form.language.value.trim(),
-               year: form.year.value,
-               video_path: movieName,
-               thumbnail: form.thumbnail.value,
-               translator_id: form.translator_id.value,
-               serie: form.seriesSelecion.value,
-               country: form.country.value.trim(),
-          };
+          const tit = title.trim();
+          const descr = description.trim();
+          const gen = genre;
+          const lang = language.trim();
+          const yr = year;
+          const video_path = movieName;
+          const thumbnail = thumbnailUrl;
+          const translator_id = translator;
+          const ser = serie;
+          const count = country.trim();
+
 
           try {
                const response = await fetch(
-                    "https://irebero.pensinova.workers.dev/movies",
+                    "https://irebero.pensinova.workers.dev/savemovies",
                     {
                          method: "POST",
                          headers: {
                               "Content-Type": "application/json",
                          },
-                         body: JSON.stringify(data),
+                         body: JSON.stringify({
+                              title: tit,
+                              video_path,
+                              thumbnail,
+                              description: descr,
+                              language: lang,
+                              year: yr,
+                              country: count,
+                              translator: translator_id,
+                              serie: ser,
+                              genre: gen
+                         }),
                     }
                );
 
                const result = await response.json();
 
-               if (!response.ok || !result.success) {
-                    throw new Error(result.message || "Failed to save movie");
+               if (!result.success) {
+                    alert(result.message);
                }
 
-               alert("Movie published successfully!");
+               alert(result.message);
 
                // Refresh movie data
                getMovies();
@@ -771,7 +793,9 @@ export default function Upload() {
 
                                              <label className="form-label mt-3">Thumbnail<span className="text-danger">*</span></label>
                                              <input id="thumbnail" type="file" className="form-control" required accept="image/*"
-                                                  onChange={(e) => uploadThumbnail(e.target.files[0])} />
+                                                  onChange={(e) => uploadThumbnail(e.target.files[0])}
+
+                                             />
 
                                              <div className="row mt-2 g-2">
                                                   <div className="col-md-7" id="uploadingThumbnail">
@@ -820,8 +844,11 @@ export default function Upload() {
                                              </div>
 
                                              <label className="form-label mt-3">Serie<span className="text-danger">*</span></label>
-                                             <select id="seriesSelecion" className="form-select">
-                                                  <option value="null">Not Series</option>
+                                             <select id="seriesSelection" className="form-select" name="serie"
+
+                                                  onChange={(e) => setSerie(e.target.value)}
+                                             >
+                                                  <option value="">Not Series</option>
                                                   {
                                                        series?.map((serie) => (
                                                             <option value={serie.id} key={serie.id}>{serie.title}</option>
@@ -840,10 +867,13 @@ export default function Upload() {
 
 
                                              <label className="form-label mt-3">Title<span className="text-danger">*</span></label>
-                                             <input id="title" type="text" className="form-control" placeholder="Movie title" value={movieName.split(".")[0]} />
+                                             {/* <input id="title" type="text" className="form-control" placeholder="Movie title" value={movieName.split(".")[0]} name="title"/> */}
+                                             <input id="title" type="text" className="form-control" placeholder="Movie title" name="title"
+                                                  value={title} onChange={(e) => setTitle(e.target.value)}
+                                             />
 
                                              <label className="form-label mt-3">Category</label>
-                                             <select id="category" className="form-select" required>
+                                             <select id="category" className="form-select" required onChange={(e) => setGenre(e.target.value)}>
                                                   <option value={null} selected disabled>Select</option>
                                                   {
                                                        genres?.map((genre) => (
@@ -865,7 +895,8 @@ export default function Upload() {
 
 
                                              <label className="form-label">Translator<span className="text-danger">*</span></label>
-                                             <select id="translator" className="form-select">
+                                             <select id="translator" className="form-select" name="translator"
+                                                  onChange={(e) => setTranslator(e.target.value)}>
                                                   <option selected disabled value={null}>Select</option>
                                                   {
                                                        translators?.map((trans) => (
@@ -876,18 +907,23 @@ export default function Upload() {
                                              </select>
 
                                              <label className="form-label mt-3">Year<span className="text-danger">*</span></label>
-                                             <input id="year" type="number" className="form-control" placeholder="Ex: 2026" />
+                                             <input id="year" type="number" className="form-control" placeholder="Ex: 2026" name="year"
+                                                  value={year} onChange={(e) => setyear(e.target.value)}
+                                             />
 
                                              <label className="form-label mt-3">Country<span className="text-danger">*</span></label>
-                                             <input id="country" type="text" className="form-control" placeholder="Country" />
+                                             <input id="country" type="text" className="form-control"
+                                                  placeholder="Country" name="country"
+                                                  value={country} onChange={e => setCountry(e.target.value)} />
 
                                              <label className="form-label mt-3">Language<span className="text-danger">*</span></label>
-                                             <input id="language" type="text" className="form-control" placeholder="Ex: English" />
+                                             <input id="language" type="text" className="form-control"
+                                                  placeholder="Movie language" name="language" value={language} onChange={e => setLanguage(e.target.value)} />
 
 
 
                                              <label className="form-label mt-3">Description<span className="text-danger">*</span></label>
-                                             <textarea id="description" className="form-control" rows="4"
+                                             <textarea id="description" className="form-control" rows="4" name="description" value={description} onChange={e => setDescription(e.target.value)}
                                                   placeholder="Enter Movie Description"></textarea>
 
                                         </div>

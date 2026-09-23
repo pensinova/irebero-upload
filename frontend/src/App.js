@@ -9,6 +9,8 @@ import { useEffect, useState } from 'react';
 import Navigate from './navigator';
 import { useAuth } from './authContext';
 import EditMovie from './pages/editMovie';
+import EditSerie from './pages/editSerie';
+import Play from './pages/play';
 
 
 
@@ -36,6 +38,8 @@ function App() {
 
         <Route path="movies" element={<Navigate to="/movies"><Movies /></Navigate>} />
         <Route path="editmovie" element={<Navigate to="/editmovie"><EditMovie /></Navigate>} />
+        <Route path="editserie" element={<Navigate to="/editserie"><EditSerie /></Navigate>} />
+        <Route path="play" element={<Navigate to="/play"><Play /></Navigate>} />
 
 
         <Route path="/signin" element={<Signin />} />
