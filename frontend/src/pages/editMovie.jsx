@@ -41,7 +41,7 @@ const EditMovie = () => {
 
      const [selectFromAvailable, setSelectFromAvailable] = useState(false);
 
-     const [title, setTitle] = useState("");
+     const [title, setTitle] = useState(movie.title);
      const [serieDescription, setSerieDescription] = useState("");
      const [serieYear, setSerieYear] = useState("");
      const [serieCountry, setSerieCountry] = useState("");
@@ -52,6 +52,18 @@ const EditMovie = () => {
 
      const [fillAll, setFillAll] = useState(false);
 
+
+
+     const [serie, setSerie] = useState(movie.serie);
+     const [genre, setGenre] = useState(movie.genre_id);
+     const [translator, setTranslator] = useState(movie.translator_id);
+     const [year, setYear] = useState(movie.year);
+     const [country, setCountry] = useState(movie.country);
+     const [description, setDescription] = useState(movie.description);
+     const [language, setLanguage] = useState(movie.language);
+
+
+// alert(genre);
 
 
      // FETCHES
@@ -138,6 +150,123 @@ const EditMovie = () => {
 
 
 
+     const updateMovie = async (e) => {
+          e.preventDefault();
+
+
+          const tit = title.trim();
+          const descr = description.trim();
+          const gen = genre.trim();
+          const lang = language.trim();
+          const yr = year;
+          const video_path = movieName || movie.video_path;
+          const thumbnail = thumbnailUrl || movie.thumbnail;
+          const translator_id = translator || movie.translator;
+          const ser = serie;
+          const count = country.trim();
+
+          // alert(movie.id); return
+          try {
+               const response = await fetch(
+                    "https://irebero.pensinova.workers.dev/editmovie",
+                    {
+                         method: "POST",
+                         headers: {
+                              "Content-Type": "application/json",
+                         },
+                         body: JSON.stringify({
+                              id: movie.id,
+                              title: tit,
+                              video_path,
+                              thumbnail,
+                              description: descr,
+                              language: lang,
+                              year: yr,
+                              country: count,
+                              translator_id,
+                              serie: ser,
+                              genre: gen
+                         }),
+                    }
+               );
+
+               const result = await response.json();
+
+               if (!result.success) {
+                    alert(result.message);
+               }
+
+               alert(result.message);
+
+
+
+          } catch (error) {
+               console.error("DB SAVE ERROR:", error);
+               alert(error.message);
+          }
+     };
+
+
+
+     // UPLOAD THUMBNAIL TO R2
+
+     async function uploadThumbnail(file) {
+
+
+          if (!file) return;
+
+          const imageUrl = URL.createObjectURL(file);
+          setThumbnailUrl(file.name);
+
+
+          const formData = new FormData();
+
+          formData.append("thumbnail", file);
+
+          setUploadingThumbnail(true);
+
+          try {
+
+               const res = await fetch("https://irebero.pensinova.workers.dev/upload/thumbnail", {
+                    method: "POST",
+                    body: formData
+               });
+
+
+               const text = await res.text();
+
+
+               let data;
+
+               try {
+                    data = JSON.parse(text);
+
+                    setUploadingThumbnailSuccess(data);
+
+               }
+               catch {
+
+                    throw new Error("Server returned invalid JSON");
+               }
+
+               setUploadingThumbnail(false);
+
+
+          }
+          catch (err) {
+               setUploadingThumbnailSuccess({ success: false, message: 'Network Error! Try again.' });
+               console.log(err);
+          }
+     }
+
+
+
+
+
+
+
+
+
      if (!movie) {
           return <div className="container">Movie not found.</div>;
      }
@@ -164,7 +293,7 @@ const EditMovie = () => {
                          </div>
                          <div className="card-body">
 
-                              <form>
+                              <form onSubmit={updateMovie}>
 
                                    <div className="">
                                         <label htmlFor="url" className="form-label">
@@ -191,13 +320,47 @@ const EditMovie = () => {
                                              type="file"
                                              id="thumbnail"
                                              className="form-control shadow-sm"
+                                             onChange={(e) => uploadThumbnail(e.target.files[0])}
                                         />
 
+                                        <div className="row">
+                                             <div className="col-md-5">
 
-                                        <img src={`${thumbnailBase}${movie.thumbnail}`}
-                                             alt="Thumbnail"
-                                             className="img-thumbnail"
-                                             width={150} />
+                                                  {uploadingThumbnail === true ? (
+                                                       <div className="alert alert-info">
+                                                            <div className="spinner-border spinner-border-sm me-1" role="status">
+                                                                 <span className="visually-hidden small">Loading...</span>
+                                                            </div>
+                                                            Uploading Thumbnail...
+                                                       </div>)
+
+                                                       :
+
+
+                                                       <img src={`${thumbnailBase}${movie.thumbnail}`}
+                                                            alt="Thumbnail"
+                                                            className="img-thumbnail"
+                                                            width={150} />
+                                                  }
+                                             </div>
+                                             <div className="col-md-7">
+                                                  {/* success */}
+                                                  {uploadingThumbnailSuccess.success === true &&
+                                                       <div className="alert alert-success alert-dismissible fade show" role="alert">
+                                                            <i className="bi bi-check-circle"></i> Image Uploaded Successfully.
+                                                            <button type="button" className="btn-close" data-bs-dismiss="alert"></button>
+                                                       </div>}
+
+                                                  {uploadingThumbnailSuccess.success === false &&
+                                                       <div className="alert alert-danger alert-dismissible fade show" role="alert">
+                                                            <i className="bi bi-x-circle text-danger"></i> {uploadingThumbnailSuccess.message}
+                                                            <button type="button" className="btn-close" data-bs-dismiss="alert"></button>
+                                                       </div>
+                                                  }
+
+                                             </div>
+                                        </div>
+
                                    </div>
 
                                    <div className="mt-4">
@@ -209,7 +372,8 @@ const EditMovie = () => {
                                              type="text"
                                              id="title"
                                              className="form-control shadow-sm"
-                                             defaultValue={movie.title}
+                                             value={title}
+                                             onChange={(e) => setTitle(e.target.value)}
                                              required
                                         />
                                    </div>
@@ -219,10 +383,12 @@ const EditMovie = () => {
                                              Genre:
                                         </label>
 
+
                                         <select
                                              id="genre"
                                              className="form-select shadow-sm"
-                                             defaultValue={movie.genre}
+                                             value={genre}
+                                             onChange={(e) => setGenre(e.target.value)}
                                              required
                                         >
 
@@ -240,9 +406,12 @@ const EditMovie = () => {
                                         <select
                                              id="translator"
                                              className="form-select shadow-sm"
-                                             defaultValue={movie.translator}
+                                             value={translator}
+                                             onChange={(e) => setTranslator(e.target.value)}
                                              required
                                         >
+                                             {/* <option value={null}>- Select -</option> */}
+
                                              {translators.map((trans, i) => (
                                                   <option value={trans.id} key={i}>{trans.name}</option>
                                              ))}
@@ -258,7 +427,8 @@ const EditMovie = () => {
                                              type="number"
                                              id="year"
                                              className="form-control shadow-sm"
-                                             defaultValue={movie.year}
+                                             value={year}
+                                             onChange={(e) => setYear(e.target.value)}
                                              required
                                         />
                                    </div>
@@ -272,7 +442,8 @@ const EditMovie = () => {
                                              type="text"
                                              id="country"
                                              className="form-control shadow-sm"
-                                             defaultValue={movie.country}
+                                             value={country}
+                                             onChange={e => setCountry(e.target.value)}
                                              required
                                         />
                                    </div>
@@ -286,8 +457,9 @@ const EditMovie = () => {
                                              type="text"
                                              id="language"
                                              className="form-control shadow-sm"
-                                             defaultValue={movie.language}
-
+                                             defaultValue={language}
+                                             onChange={e => setLanguage(e.target.value)}
+                                             required
                                         />
                                    </div>
 
@@ -299,11 +471,12 @@ const EditMovie = () => {
                                         <select
                                              id="series"
                                              className="form-select shadow-sm"
-                                             defaultValue={movie.series}
+                                             defaultValue={serie}
+                                             onChange={e => setSerie(e.target.value)}
                                              required
 
                                         >
-                                             <option value="">Not serie</option>
+                                             <option value='null'>- Not serie -</option>
                                              {
                                                   series.map((ser, i) => (
                                                        <option value={ser.id} key={i}>{ser.title}</option>
@@ -321,7 +494,8 @@ const EditMovie = () => {
                                              id="description"
                                              className="form-control shadow-sm"
                                              rows="5"
-                                             defaultValue={movie.description}
+                                             defaultValue={description}
+                                             onChange={e => setDescription(e.target.value)}
                                              required
                                         ></textarea>
                                    </div>

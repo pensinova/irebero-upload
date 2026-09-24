@@ -35,7 +35,7 @@ export default function Header() {
 
           <div className="container">
 
-               <nav className="navbar navbar-expand-lg bg-dark-subtle rounded-pill">
+               <nav className="navbar navbar-expand-lg bg-dark-subtle rounded-2">
 
                     <div className="container px-3">
                          <Link className="navbar-brand badge bg-transparent" to="/">

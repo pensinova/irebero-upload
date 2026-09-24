@@ -50,12 +50,20 @@ export default function Upload() {
 
 
      const [serie, setSerie] = useState("");
-     const [genre, setGenre] = useState("");
+     const [genre, setGenre] = useState(null);
      const [translator, setTranslator] = useState("");
-     const [year, setyear] = useState("");
+     const [year, setYear] = useState("");
      const [country, setCountry] = useState("");
      const [description, setDescription] = useState("");
      const [language, setLanguage] = useState("");
+
+
+     const [isSerie, setIsSerie] = useState(false);
+
+     const [selectedSerie, setSelectedSerie] = useState({});
+     const [episode, setEpisode] = useState('');
+     const [season, setSeason] = useState("");
+
 
 
 
@@ -637,6 +645,38 @@ export default function Upload() {
 
 
 
+     const filterSerie = (id) => {
+          if (id != "") {
+               const ser = series.find((s) => s.id == id);
+
+               setSelectedSerie(ser);
+
+               setIsSerie(true);
+               setTitle(ser.title);
+
+               setThumbnailUrl(ser.thumbnail);
+               setTranslator(ser.translator);
+               setGenre(ser.genre);
+               setCountry(ser.country);
+               setYear(Number(ser.year));
+               setDescription(ser.description);
+               setLanguage(ser.language);
+          }
+          else {
+               setSelectedSerie(null);
+
+               setIsSerie(false);
+               setTitle("");
+
+               setThumbnailUrl("");
+               setTranslator("");
+               setGenre("");
+               setCountry("");
+               setYear("");
+               setDescription("");
+               setLanguage("");
+          }
+     };
 
 
 
@@ -846,8 +886,12 @@ export default function Upload() {
                                              <label className="form-label mt-3">Serie<span className="text-danger">*</span></label>
                                              <select id="seriesSelection" className="form-select" name="serie"
 
-                                                  onChange={(e) => setSerie(e.target.value)}
-                                             >
+                                                  onChange={(e) => {
+                                                       setSerie(e.target.value);
+
+                                                       filterSerie(e.target.value);
+                                                  }}>
+
                                                   <option value="">Not Series</option>
                                                   {
                                                        series?.map((serie) => (
@@ -859,6 +903,23 @@ export default function Upload() {
                                              </select>
 
 
+                                             {isSerie &&
+
+                                                  <div className="row g-1 mt-1">
+                                                       <div className="col-md-6">
+                                                            <input type="number" className="form-control border-danger shadow"
+                                                                 placeholder="Season"
+                                                                 value={season}
+                                                                 onChange={(e) => setSeason(e.target.value)} required />
+                                                       </div>
+                                                       <div className="col-md-6">
+                                                            <input type="number" className="form-control border-danger shadow" placeholder="Episode"
+
+                                                                 value={episode}
+                                                                 onChange={(e) => setEpisode(e.target.value)} required />
+                                                       </div>
+                                                  </div>
+                                             }
                                              <div className="text-end">
                                                   <button type="button" className="btn btn-sm small text-light text-decoration-none" data-bs-toggle="modal" data-bs-target="#newSerie">
                                                        + Add New
@@ -870,11 +931,14 @@ export default function Upload() {
                                              {/* <input id="title" type="text" className="form-control" placeholder="Movie title" value={movieName.split(".")[0]} name="title"/> */}
                                              <input id="title" type="text" className="form-control" placeholder="Movie title" name="title"
                                                   value={title} onChange={(e) => setTitle(e.target.value)}
+
+                                                  disabled={isSerie}
                                              />
 
                                              <label className="form-label mt-3">Category</label>
-                                             <select id="category" className="form-select" required onChange={(e) => setGenre(e.target.value)}>
-                                                  <option value={null} selected disabled>Select</option>
+                                             <select id="category" className="form-select" required disabled={true}
+                                                  value={genre} onChange={(e) => setGenre(e.target.value)}>
+                                                  <option value={null} disabled>Select</option>
                                                   {
                                                        genres?.map((genre) => (
                                                             <option value={genre.id} key={genre.id}>{genre.name}</option>
@@ -895,9 +959,9 @@ export default function Upload() {
 
 
                                              <label className="form-label">Translator<span className="text-danger">*</span></label>
-                                             <select id="translator" className="form-select" name="translator"
-                                                  onChange={(e) => setTranslator(e.target.value)}>
-                                                  <option selected disabled value={null}>Select</option>
+                                             <select id="translator" className="form-select" name="translator" disabled={isSerie}
+                                                  value={translator} onChange={(e) => setTranslator(e.target.value)}>
+                                                  <option disabled value="">Select</option>
                                                   {
                                                        translators?.map((trans) => (
                                                             <option value={trans.id} key={trans.id}>{trans.name}</option>
@@ -908,23 +972,26 @@ export default function Upload() {
 
                                              <label className="form-label mt-3">Year<span className="text-danger">*</span></label>
                                              <input id="year" type="number" className="form-control" placeholder="Ex: 2026" name="year"
-                                                  value={year} onChange={(e) => setyear(e.target.value)}
+                                                  value={year} onChange={(e) => setYear(e.target.value)}
+                                                  disabled={isSerie}
                                              />
 
                                              <label className="form-label mt-3">Country<span className="text-danger">*</span></label>
                                              <input id="country" type="text" className="form-control"
                                                   placeholder="Country" name="country"
-                                                  value={country} onChange={e => setCountry(e.target.value)} />
+                                                  value={country} onChange={e => setCountry(e.target.value)} disabled={isSerie} />
 
                                              <label className="form-label mt-3">Language<span className="text-danger">*</span></label>
                                              <input id="language" type="text" className="form-control"
-                                                  placeholder="Movie language" name="language" value={language} onChange={e => setLanguage(e.target.value)} />
+                                                  placeholder="Movie language" name="language" value={language}
+                                                  disabled={isSerie}
+                                                  onChange={e => setLanguage(e.target.value)} />
 
 
 
                                              <label className="form-label mt-3">Description<span className="text-danger">*</span></label>
                                              <textarea id="description" className="form-control" rows="4" name="description" value={description} onChange={e => setDescription(e.target.value)}
-                                                  placeholder="Enter Movie Description"></textarea>
+                                                  placeholder="Enter Movie Description" disabled={isSerie}></textarea>
 
                                         </div>
 
