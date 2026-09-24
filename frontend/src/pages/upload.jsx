@@ -832,7 +832,7 @@ export default function Upload() {
 
 
                                              <label className="form-label mt-3">Thumbnail<span className="text-danger">*</span></label>
-                                             <input id="thumbnail" type="file" className="form-control" required accept="image/*"
+                                             <input id="thumbnail" type="file" className="form-control" required accept="image/*" disabled={isSerie}
                                                   onChange={(e) => uploadThumbnail(e.target.files[0])}
 
                                              />
@@ -872,7 +872,7 @@ export default function Upload() {
                                                   <div className="col-md-5 preview-box" id="previewThumbnail">
 
                                                        {thumbnailUrl &&
-                                                            (<img src={thumbnailUrl} className="img-fluid rounded shadow" style={{
+                                                            (<img src={isSerie?selectedSerie.thumbnail:thumbnailUrl} className="img-fluid rounded shadow" style={{
                                                                  maxHeight: 200,
                                                                  width: "100%",
                                                                  // height: "300px",
